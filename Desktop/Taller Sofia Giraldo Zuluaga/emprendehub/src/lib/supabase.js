@@ -1,7 +1,17 @@
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+const FALLBACK_SUPABASE_URL = 'https://nbijolcytzinsncoonbn.supabase.co';
+const FALLBACK_SUPABASE_ANON_KEY =
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5iaWpvbGN5dHppbnNuY29vbmJuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI2NzE2NDgsImV4cCI6MjA4ODI0NzY0OH0.xZjK8EGuq2Xv4qJHsPCFQ_om_xusU2ADEuEnwvmAGUI';
+
+const envUrl = import.meta.env.VITE_SUPABASE_URL?.trim();
+const envAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY?.trim();
+
+const isValidSupabaseUrl = (value) =>
+  /^https:\/\/[a-z0-9-]+\.supabase\.co$/i.test(value ?? '');
+
+const supabaseUrl = isValidSupabaseUrl(envUrl) ? envUrl : FALLBACK_SUPABASE_URL;
+const supabaseAnonKey = envAnonKey && envAnonKey.length > 20 ? envAnonKey : FALLBACK_SUPABASE_ANON_KEY;
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
