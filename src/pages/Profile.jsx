@@ -34,11 +34,12 @@ export default function Profile() {
     ];
 
     return (
-        <div className="animate-fade-in" style={{ padding: '28px', maxWidth: '900px' }}>
+        <div className="page-shell animate-fade-in">
             <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '28px' }}>
                 <div style={{ width: '52px', height: '52px', borderRadius: '14px', backgroundColor: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '22px', fontWeight: 800, color: 'white' }}>{initial}</div>
                 <div>
-                    <h1 style={{ fontSize: '22px', fontWeight: 800 }}>Mi Perfil</h1>
+                    <p className="page-kicker">Cuenta</p>
+                    <h1 className="page-title" style={{ fontSize: '34px' }}>Mi perfil</h1>
                     <p style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>{profile?.stage || 'Etapa: Idea'} · {profile?.sector || 'Sector no definido'}</p>
                 </div>
             </div>

@@ -1,162 +1,227 @@
-import React from 'react';
+import React, { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowRight, ClipboardList, CheckCircle2, Circle, BookOpen, Target, AlertCircle, Zap, TrendingUp, Award } from 'lucide-react';
+import { CalendarClock, Check, Circle, SquareCheckBig, TrendingUp } from 'lucide-react';
+import { Badge, Button, Card, EmptyState, PageHeader, StatCard } from '../components/ui';
 import { useApp } from '../context/AppContext';
-import { STAGES } from '../data/mockData';
+import { MOCK_OPPORTUNITIES } from '../data/mockData';
+
+const BUSINESS_AREAS = [
+  { label: 'Ventas', sections: ['Mercadeo'], fallback: 3 },
+  { label: 'Finanzas', sections: ['Financiero'], fallback: 5 },
+  { label: 'Operaciones', sections: ['Formalizacion'], fallback: 7 },
+  { label: 'Marketing', sections: ['Mercadeo'], fallback: 2 },
+  { label: 'Producto', sections: ['Producto / Servicio'], fallback: 8 },
+];
+
+function getGreeting() {
+  const hour = new Date().getHours();
+  if (hour < 12) return 'Buenos dias';
+  if (hour < 19) return 'Buenas tardes';
+  return 'Buenas noches';
+}
+
+function BusinessBar({ label, value }) {
+  return (
+    <div style={{ display: 'grid', gridTemplateColumns: '110px 1fr 44px', gap: '12px', alignItems: 'center' }}>
+      <span style={{ color: 'var(--text-secondary)', fontWeight: 600 }}>{label}</span>
+      <div className="progress-bg" style={{ height: '8px' }}>
+        <div className="progress-fill" style={{ width: `${Math.min(100, value * 10)}%` }} />
+      </div>
+      <span style={{ color: 'var(--text-secondary)', fontSize: '13px', fontWeight: 700 }}>{value}/10</span>
+    </div>
+  );
+}
 
 export default function Dashboard() {
-    const { profile, diagnosticCompleted, tasks, completedTasks, totalTasks, progressPercent, completedCourses, points, level, activityEvents } = useApp();
-    const navigate = useNavigate();
+  const {
+    profile,
+    diagnosticCompleted,
+    tasks,
+    progressPercent,
+    completedTasks,
+    totalTasks,
+    todayPlan,
+    updateTask,
+    continueToNextAction,
+  } = useApp();
+  const navigate = useNavigate();
+  const [updatingId, setUpdatingId] = useState(null);
 
-    const name = profile?.full_name?.split(' ')[0] || 'Emprendedor';
+  const name = profile?.full_name?.split(' ')[0] || 'Carlos';
+  const pendingTasks = tasks.filter((task) => task.status !== 'completado');
+  const weeklyTasks = todayPlan.topTasks.length > 0 ? todayPlan.topTasks : pendingTasks.slice(0, 4);
+
+  const health = useMemo(() => {
+    return BUSINESS_AREAS.map((area) => {
+      const relevant = tasks.filter((task) => area.sections.includes(task.section));
+      if (!relevant.length) return { ...area, value: area.fallback };
+      const done = relevant.filter((task) => task.status === 'completado').length;
+      const value = Math.max(1, Math.round((done / relevant.length) * 10));
+      return { ...area, value };
+    });
+  }, [tasks]);
+
+  const compatibleOpps = MOCK_OPPORTUNITIES.filter((opp) => {
     const stage = profile?.stage || 'Idea';
-    const stageIndex = STAGES.indexOf(stage);
-    const pendingTasks = tasks.filter(t => t.status !== 'completado').slice(0, 4);
+    return opp.status === 'Abierta' && opp.stages?.includes(stage);
+  }).slice(0, 3);
 
-    const hour = new Date().getHours();
-    const greeting = hour < 12 ? '¡Buenos días' : hour < 19 ? '¡Buenas tardes' : '¡Buenas noches';
+  const toggleTask = async (task) => {
+    setUpdatingId(task.id);
+    await updateTask(task.id, task.status === 'completado' ? 'pendiente' : 'completado');
+    setUpdatingId(null);
+  };
 
-    return (
-        <div className="animate-fade-in" style={{ padding: '28px', maxWidth: '1100px' }}>
-            {/* Header */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '28px' }}>
-                <div>
-                    <h1 style={{ fontSize: '26px', fontWeight: 800, marginBottom: '4px' }}>{greeting}, {name}! 👋</h1>
-                    <p style={{ color: 'var(--text-secondary)', fontSize: '15px' }}>
-                        {diagnosticCompleted ? `Etapa actual: ${stage}` : 'Completa el diagnóstico para personalizar tu experiencia'}
-                    </p>
-                </div>
-                <button className="btn btn-primary" onClick={() => navigate('/ruta')} style={{ gap: '8px', whiteSpace: 'nowrap' }}>
-                    Ver mi ruta <ArrowRight size={16} />
-                </button>
+  return (
+    <div className="page-shell animate-fade-in">
+      <PageHeader
+        kicker="Inicio"
+        title={`${getGreeting()}, ${name}`}
+        subtitle={
+          diagnosticCompleted
+            ? `Tienes ${pendingTasks.length} tareas pendientes esta semana. Tu proximo comite esta a 11 dias.`
+            : 'Completa el diagnostico para que Soe priorice tu plan de accion.'
+        }
+        action={<Button onClick={() => continueToNextAction(navigate)}>Continuar prioridad</Button>}
+      />
+
+      {!diagnosticCompleted ? (
+        <Card style={{ marginBottom: '18px', borderColor: 'var(--status-warning)', background: '#fffaf0' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', gap: '16px', alignItems: 'center', flexWrap: 'wrap' }}>
+            <div>
+              <p style={{ fontWeight: 800, color: '#8a6730' }}>Diagnostico pendiente</p>
+              <p style={{ color: 'var(--text-secondary)', marginTop: '4px' }}>Activa recomendaciones y prioridades segun tu etapa real.</p>
             </div>
+            <Button variant="secondary" onClick={() => navigate('/diagnostico')}>Completar diagnostico</Button>
+          </div>
+        </Card>
+      ) : null}
 
-            {/* Diagnostic reminder */}
-            {!diagnosticCompleted && (
-                <div onClick={() => navigate('/diagnostico')} style={{ backgroundColor: '#fefce8', border: '1px solid #fde047', borderRadius: '12px', padding: '16px 20px', marginBottom: '24px', display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer' }}>
-                    <AlertCircle size={20} style={{ color: '#ca8a04', flexShrink: 0 }} />
-                    <div style={{ flex: 1 }}>
-                        <p style={{ fontWeight: 700, color: '#92400e' }}>Diagnóstico pendiente</p>
-                        <p style={{ fontSize: '13px', color: '#a16207' }}>Completa el diagnóstico para recibir una ruta personalizada y recomendaciones.</p>
-                    </div>
-                    <button className="btn btn-secondary" style={{ fontSize: '13px', padding: '8px 14px', whiteSpace: 'nowrap' }}>
-                        Hacer diagnóstico →
-                    </button>
-                </div>
-            )}
+      <div className="section-grid-3" style={{ marginBottom: '24px' }}>
+        <StatCard
+          value={`${progressPercent}%`}
+          label="Progreso del mes"
+          helper="+12% vs mes anterior"
+          icon={<TrendingUp size={22} />}
+          onClick={() => navigate('/seguimiento')}
+        />
+        <StatCard
+          value={Math.max(totalTasks - completedTasks, 0)}
+          label="Tareas pendientes"
+          helper="Vencen esta semana"
+          icon={<SquareCheckBig size={22} />}
+          onClick={() => navigate('/ruta')}
+        />
+        <StatCard
+          value="11d"
+          label="Proximo comite"
+          helper="Direccion mensual"
+          icon={<CalendarClock size={22} />}
+          onClick={() => navigate('/mi-agente')}
+        />
+      </div>
 
-            {/* Stage progression */}
-            <div className="card" style={{ padding: '20px 24px', marginBottom: '20px', background: 'linear-gradient(135deg, #f0fdf4 0%, white 100%)', border: '1px solid #bbf7d0' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-                    <div>
-                        <p style={{ fontSize: '12px', color: 'var(--text-tertiary)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Etapa actual</p>
-                        <p style={{ fontSize: '22px', fontWeight: 800, color: 'var(--primary)' }}>{stage}</p>
-                    </div>
-                    <div style={{ textAlign: 'right' }}>
-                        <p style={{ fontSize: '12px', color: 'var(--text-tertiary)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Progreso general</p>
-                        <p style={{ fontSize: '28px', fontWeight: 800 }}>{progressPercent}%</p>
-                    </div>
-                </div>
-                <div style={{ position: 'relative' }}>
-                    <div style={{ height: '8px', backgroundColor: '#e2e8f0', borderRadius: '8px' }}>
-                        <div style={{ height: '100%', width: `${progressPercent}%`, backgroundColor: 'var(--primary)', borderRadius: '8px', transition: '1s ease' }} />
-                    </div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '8px' }}>
-                        {STAGES.map((s, i) => (
-                            <span key={s} style={{ fontSize: '11px', fontWeight: i <= stageIndex ? 700 : 400, color: i <= stageIndex ? 'var(--primary)' : 'var(--text-tertiary)', cursor: 'pointer' }}>{s}</span>
-                        ))}
-                    </div>
-                </div>
+      <div className="section-grid-2" style={{ marginBottom: '20px' }}>
+        <Card>
+          <div style={{ display: 'flex', justifyContent: 'space-between', gap: '14px', alignItems: 'center', marginBottom: '18px' }}>
+            <h2 className="page-kicker">Tareas de esta semana</h2>
+            <Button variant="ghost" onClick={() => navigate('/ruta')} style={{ minHeight: '34px', padding: '7px 10px' }}>
+              Ver plan
+            </Button>
+          </div>
+          {weeklyTasks.length === 0 ? (
+            <EmptyState title="Sin tareas pendientes" description="Tu plan queda listo para el siguiente ciclo." />
+          ) : (
+            <div style={{ display: 'grid', gap: '12px' }}>
+              {weeklyTasks.map((task) => {
+                const done = task.status === 'completado';
+                return (
+                  <button
+                    key={task.id}
+                    onClick={() => toggleTask(task)}
+                    disabled={updatingId === task.id}
+                    style={{
+                      display: 'grid',
+                      gridTemplateColumns: '24px 1fr',
+                      gap: '12px',
+                      alignItems: 'start',
+                      padding: '0 0 13px',
+                      borderBottom: '1px solid var(--border)',
+                      textAlign: 'left',
+                    }}
+                  >
+                    <span
+                      style={{
+                        width: '18px',
+                        height: '18px',
+                        marginTop: '3px',
+                        borderRadius: '5px',
+                        border: `2px solid ${done ? 'var(--primary)' : 'var(--border-strong)'}`,
+                        background: done ? 'var(--primary)' : '#fff',
+                        color: '#fff',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}
+                    >
+                      {done ? <Check size={13} /> : null}
+                    </span>
+                    <span>
+                      <span style={{ display: 'block', fontWeight: 800, color: done ? 'var(--text-tertiary)' : 'var(--text-primary)' }}>{task.title}</span>
+                      <span style={{ display: 'block', color: 'var(--text-secondary)', fontSize: '13px' }}>
+                        {done ? 'Completada' : task.priority === 'Alta' ? 'Alta prioridad' : 'Vence pronto'}
+                      </span>
+                    </span>
+                  </button>
+                );
+              })}
             </div>
+          )}
+        </Card>
 
-            {/* Stats */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px', marginBottom: '24px' }}>
-                {[
-                    { icon: <CheckCircle2 size={22} style={{ color: '#10b981' }} />, value: completedTasks, label: 'Tareas completadas', bg: '#f0fdf4', border: '#bbf7d0', action: () => navigate('/ruta') },
-                    { icon: <BookOpen size={22} style={{ color: '#6366f1' }} />, value: completedCourses, label: 'Cursos completados', bg: '#eef2ff', border: '#c7d2fe', action: () => navigate('/cursos') },
-                    { icon: <Zap size={22} style={{ color: '#f59e0b' }} />, value: points, label: 'Puntos ganados', bg: '#fffbeb', border: '#fde68a', action: () => navigate('/seguimiento') },
-                    { icon: <Target size={22} style={{ color: '#ec4899' }} />, value: `${totalTasks - completedTasks}`, label: 'Tareas pendientes', bg: '#fdf2f8', border: '#fbcfe8', action: () => navigate('/primeros-pasos') },
-                ].map((stat, i) => (
-                    <div key={i} className="card" onClick={stat.action}
-                        style={{ padding: '18px', display: 'flex', gap: '14px', alignItems: 'center', backgroundColor: stat.bg, border: `1px solid ${stat.border}`, cursor: 'pointer', transition: 'var(--transition)' }}
-                        onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-2px)'}
-                        onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}>
-                        <div style={{ padding: '10px', borderRadius: '10px', backgroundColor: 'white' }}>{stat.icon}</div>
-                        <div>
-                            <p style={{ fontSize: '24px', fontWeight: 800, lineHeight: 1.1 }}>{stat.value}</p>
-                            <p style={{ fontSize: '12px', color: 'var(--text-secondary)', fontWeight: 500 }}>{stat.label}</p>
-                        </div>
-                    </div>
-                ))}
-            </div>
+        <Card>
+          <h2 className="page-kicker" style={{ marginBottom: '22px' }}>Estado del negocio</h2>
+          <div style={{ display: 'grid', gap: '16px' }}>
+            {health.map((area) => <BusinessBar key={area.label} label={area.label} value={area.value} />)}
+          </div>
+        </Card>
+      </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
-                {/* Next tasks */}
-                <div className="card" style={{ padding: '24px' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-                        <h2 style={{ fontWeight: 700, fontSize: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            <Target size={18} style={{ color: 'var(--primary)' }} /> Próximas tareas
-                        </h2>
-                        <button className="btn-ghost" style={{ fontSize: '13px', color: 'var(--primary)' }} onClick={() => navigate('/primeros-pasos')}>Ver todas →</button>
-                    </div>
-                    {pendingTasks.length === 0 ? (
-                        <div style={{ textAlign: 'center', padding: '20px', color: 'var(--text-tertiary)' }}>
-                            <p>¡Sin tareas pendientes! 🎉</p>
-                        </div>
-                    ) : (
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                            {pendingTasks.map(task => (
-                                <div key={task.id} onClick={() => navigate('/ruta')}
-                                    style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 12px', borderRadius: '8px', backgroundColor: 'var(--bg-main)', cursor: 'pointer', border: '1px solid transparent', transition: 'var(--transition)' }}
-                                    onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--primary-light)'; e.currentTarget.style.backgroundColor = '#f0fdf4'; }}
-                                    onMouseLeave={e => { e.currentTarget.style.borderColor = 'transparent'; e.currentTarget.style.backgroundColor = 'var(--bg-main)'; }}>
-                                    <Circle size={16} style={{ color: 'var(--text-tertiary)', flexShrink: 0 }} />
-                                    <div style={{ flex: 1 }}>
-                                        <p style={{ fontSize: '13px', fontWeight: 600 }}>{task.title}</p>
-                                        <p style={{ fontSize: '11px', color: 'var(--text-tertiary)' }}>{task.section}</p>
-                                    </div>
-                                    <span style={{ fontSize: '11px', padding: '2px 8px', borderRadius: '99px', fontWeight: 600, backgroundColor: task.priority === 'Alta' ? '#fee2e2' : task.priority === 'Media' ? '#fef9c3' : '#f1f5f9', color: task.priority === 'Alta' ? '#dc2626' : task.priority === 'Media' ? '#92400e' : 'var(--text-tertiary)' }}>
-                                        {task.priority}
-                                    </span>
-                                </div>
-                            ))}
-                        </div>
-                    )}
-                </div>
-
-                {/* Activity feed */}
-                <div className="card" style={{ padding: '24px' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-                        <h2 style={{ fontWeight: 700, fontSize: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            <TrendingUp size={18} style={{ color: 'var(--primary)' }} /> Actividad reciente
-                        </h2>
-                        <button className="btn-ghost" style={{ fontSize: '13px', color: 'var(--primary)' }} onClick={() => navigate('/seguimiento')}>Ver todo →</button>
-                    </div>
-                    {activityEvents.length === 0 ? (
-                        <div style={{ textAlign: 'center', padding: '20px', color: 'var(--text-tertiary)' }}>
-                            <p style={{ marginBottom: '8px' }}>Sin actividad aún.</p>
-                            <p style={{ fontSize: '13px' }}>Completa tareas y gana puntos para ver tu historial aquí.</p>
-                        </div>
-                    ) : (
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                            {activityEvents.slice(0, 6).map(ev => (
-                                <div key={ev.id} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '8px 0', borderBottom: '1px solid var(--border)' }}>
-                                    <span style={{ fontSize: '18px', flexShrink: 0 }}>{ev.icon || '✅'}</span>
-                                    <div style={{ flex: 1 }}>
-                                        <p style={{ fontSize: '13px', fontWeight: 600 }}>{ev.description}</p>
-                                        <p style={{ fontSize: '11px', color: 'var(--text-tertiary)' }}>{new Date(ev.timestamp).toLocaleDateString('es-CO', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}</p>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    )}
-                    {activityEvents.length === 0 && (
-                        <button className="btn btn-primary" onClick={() => navigate('/diagnostico')} style={{ width: '100%', marginTop: '16px' }}>
-                            Empezar con el diagnóstico →
-                        </button>
-                    )}
-                </div>
-            </div>
+      <Card>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '14px', marginBottom: '16px', flexWrap: 'wrap' }}>
+          <h2 className="page-kicker">Oportunidades del ecosistema</h2>
+          <Button variant="secondary" onClick={() => navigate('/oportunidades')}>Ver oportunidades</Button>
         </div>
-    );
+        <div style={{ display: 'grid', gap: '0' }}>
+          {(compatibleOpps.length ? compatibleOpps : MOCK_OPPORTUNITIES.slice(0, 3)).map((opp) => {
+            const applies = opp.stages?.includes(profile?.stage || 'Idea');
+            return (
+              <button
+                key={opp.id}
+                onClick={() => navigate('/oportunidades')}
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: '14px 1fr auto',
+                  gap: '14px',
+                  alignItems: 'center',
+                  padding: '14px 0',
+                  borderBottom: '1px solid var(--border)',
+                  textAlign: 'left',
+                }}
+              >
+                <Circle size={9} fill="var(--primary)" style={{ color: 'var(--primary)' }} />
+                <span>
+                  <span style={{ fontWeight: 800 }}>{opp.title}</span>
+                  <span style={{ display: 'block', color: 'var(--text-secondary)', fontSize: '13px' }}>
+                    {opp.organization} · {opp.deadline === 'Permanente' ? 'Permanente' : `Cierra ${opp.deadline}`}
+                  </span>
+                </span>
+                {applies ? <Badge tone="mint">Aplica para ti</Badge> : <Badge>Revisar</Badge>}
+              </button>
+            );
+          })}
+        </div>
+      </Card>
+    </div>
+  );
 }

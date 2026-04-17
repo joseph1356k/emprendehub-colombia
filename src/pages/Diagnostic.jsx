@@ -1,185 +1,210 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ClipboardList, ChevronLeft, ChevronRight, CheckCircle2, Edit } from 'lucide-react';
+import { CheckCircle2, ChevronLeft, ChevronRight, Edit } from 'lucide-react';
+import { Badge, Button, Card, PageHeader } from '../components/ui';
 import { useApp } from '../context/AppContext';
 
 const QUESTIONS = [
-    {
-        id: 'etapa', label: '¿En qué etapa se encuentra tu emprendimiento?',
-        options: [
-            { value: 'idea', label: '💡 Tengo una idea', desc: 'Aún estoy explorando y definiendo el concepto' },
-            { value: 'validando', label: '🔍 Estoy validando', desc: 'Tengo MVP o prototipo, hablo con clientes' },
-            { value: 'vendiendo', label: '💰 Ya genero ingresos', desc: 'Tengo clientes que me pagan regularmente' },
-            { value: 'creciendo', label: '📈 Estoy creciendo', desc: 'Tengo equipo, escalando operaciones' },
-            { value: 'escalando', label: '🚀 Escalando', desc: 'Busco internacionalización o rondas grandes' },
-        ]
-    },
-    {
-        id: 'formalizacion', label: '¿Qué tan formalizado está tu negocio?',
-        options: [
-            { value: 'ninguna', label: '❌ No está formalizado', desc: 'Sin RUT ni matrícula mercantil aún' },
-            { value: 'en-proceso', label: '🔄 En proceso', desc: 'Iniciando trámites de formalización' },
-            { value: 'parcial', label: '⚠️ Parcialmente', desc: 'Algunos trámites completados' },
-            { value: 'completa', label: '✅ Completamente formal', desc: 'RUT, Cámara de Comercio, todo listo' },
-        ]
-    },
-    {
-        id: 'necesidad', label: '¿Cuál es tu principal necesidad ahora mismo?',
-        options: [
-            { value: 'capital', label: '💰 Capital / Financiación', desc: 'Necesito fondos para crecer' },
-            { value: 'validacion', label: '🧪 Validación de producto', desc: 'Debo confirmar si mi idea funciona' },
-            { value: 'clientes', label: '👥 Conseguir más clientes', desc: 'Necesito crecer en ventas' },
-            { value: 'equipo', label: '🤝 Armar un equipo', desc: 'Necesito socios o colaboradores' },
-            { value: 'mentoria', label: '🧭 Mentoría y guía', desc: 'Necesito orientación estratégica' },
-        ]
-    },
-    {
-        id: 'equipo', label: '¿Tienes equipo de trabajo?',
-        options: [
-            { value: 'solo', label: '👤 Solo por ahora', desc: 'Soy founder individual' },
-            { value: 'cofounders', label: '👥 1-2 cofundadores', desc: 'Tenemos equipo fundador' },
-            { value: 'pequeno', label: '🏢 3-5 personas', desc: 'Pequeño equipo operativo' },
-            { value: 'mediano', label: '🏭 Más de 5 personas', desc: 'Equipo establecido' },
-        ]
-    },
-    {
-        id: 'ingresos', label: '¿Cuánto genera tu negocio actualmente?',
-        options: [
-            { value: 'cero', label: '🌱 Aún no genera ingresos', desc: 'En fase pre-revenue' },
-            { value: 'bajo', label: '📊 Hasta $5M COP/mes', desc: 'Primeras ventas' },
-            { value: 'medio', label: '📈 $5M - $20M COP/mes', desc: 'Crecimiento temprano' },
-            { value: 'alto', label: '🚀 Más de $20M COP/mes', desc: 'Tracción comprobada' },
-        ]
-    },
-    {
-        id: 'recursos', label: '¿Qué recursos te ayudarían más?',
-        options: [
-            { value: 'herramientas', label: '🛠️ Herramientas y plantillas', desc: 'Templates, canvas, modelos' },
-            { value: 'red', label: '🌐 Red de contactos', desc: 'Connexiones, alianzas, socios' },
-            { value: 'financiacion', label: '💸 Acceso a financiación', desc: 'Fondos, créditos, convocatorias' },
-            { value: 'formación', label: '📚 Formación y cursos', desc: 'Aprende habilidades clave' },
-        ]
-    },
+  {
+    id: 'etapa',
+    label: 'En que etapa se encuentra tu negocio?',
+    options: [
+      { value: 'idea', label: 'Tengo una idea', desc: 'Estoy explorando y definiendo el concepto.' },
+      { value: 'validando', label: 'Estoy validando', desc: 'Tengo prototipo o primeras conversaciones con clientes.' },
+      { value: 'vendiendo', label: 'Ya genero ingresos', desc: 'Tengo clientes que pagan con cierta recurrencia.' },
+      { value: 'creciendo', label: 'Estoy creciendo', desc: 'Tengo equipo y necesito ordenar operaciones.' },
+      { value: 'escalando', label: 'Estoy escalando', desc: 'Busco nuevos mercados, capital o estructura directiva.' },
+    ],
+  },
+  {
+    id: 'formalizacion',
+    label: 'Que tan formalizado esta tu negocio?',
+    options: [
+      { value: 'ninguna', label: 'Sin formalizacion', desc: 'Aun no tengo RUT ni matricula mercantil.' },
+      { value: 'en-proceso', label: 'En proceso', desc: 'Estoy iniciando tramites.' },
+      { value: 'parcial', label: 'Parcialmente formal', desc: 'Algunos requisitos ya estan listos.' },
+      { value: 'completa', label: 'Completamente formal', desc: 'RUT, camara y documentos principales al dia.' },
+    ],
+  },
+  {
+    id: 'necesidad',
+    label: 'Cual es la decision mas importante ahora?',
+    options: [
+      { value: 'capital', label: 'Capital o caja', desc: 'Necesito financiar crecimiento o estabilizar flujo.' },
+      { value: 'validacion', label: 'Producto y validacion', desc: 'Debo confirmar si la oferta funciona.' },
+      { value: 'clientes', label: 'Clientes y ventas', desc: 'Necesito mejorar adquisicion y conversion.' },
+      { value: 'equipo', label: 'Equipo y roles', desc: 'Debo decidir que contratar o tercerizar.' },
+      { value: 'direccion', label: 'Direccion y criterio externo', desc: 'Necesito claridad para decidir con menos ruido.' },
+    ],
+  },
+  {
+    id: 'equipo',
+    label: 'Como esta armado tu equipo?',
+    options: [
+      { value: 'solo', label: 'Solo por ahora', desc: 'Soy fundador individual.' },
+      { value: 'cofounders', label: 'Equipo fundador pequeno', desc: 'Tengo 1 o 2 socios activos.' },
+      { value: 'pequeno', label: 'Equipo operativo pequeno', desc: 'Trabajamos entre 3 y 5 personas.' },
+      { value: 'mediano', label: 'Equipo establecido', desc: 'Mas de 5 personas sostienen la operacion.' },
+    ],
+  },
+  {
+    id: 'ingresos',
+    label: 'Cuanto genera actualmente?',
+    options: [
+      { value: 'cero', label: 'Aun no genera ingresos', desc: 'Estoy antes de ventas recurrentes.' },
+      { value: 'bajo', label: 'Hasta $5M COP/mes', desc: 'Primeras ventas.' },
+      { value: 'medio', label: '$5M - $20M COP/mes', desc: 'Traccion inicial.' },
+      { value: 'alto', label: 'Mas de $20M COP/mes', desc: 'Traccion comprobada.' },
+    ],
+  },
+  {
+    id: 'recursos',
+    label: 'Que recurso destrabaria mas avance?',
+    options: [
+      { value: 'herramientas', label: 'Herramientas y plantillas', desc: 'Necesito bajar ideas a ejecucion.' },
+      { value: 'red', label: 'Red y alianzas', desc: 'Necesito abrir conversaciones correctas.' },
+      { value: 'financiacion', label: 'Financiacion', desc: 'Necesito oportunidades de capital o credito.' },
+      { value: 'formacion', label: 'Aprendizaje practico', desc: 'Necesito fortalecer habilidades concretas.' },
+    ],
+  },
 ];
 
 export default function Diagnostic() {
-    const { diagnosticAnswers, diagnosticCompleted, saveDiagnostic } = useApp();
-    const navigate = useNavigate();
-    const [step, setStep] = useState(0);
-    const [answers, setAnswers] = useState(diagnosticAnswers || {});
-    const [saving, setSaving] = useState(false);
-    const [showEdit, setShowEdit] = useState(false);
-    const [done, setDone] = useState(diagnosticCompleted && !showEdit);
+  const { diagnosticAnswers, diagnosticCompleted, saveDiagnostic } = useApp();
+  const navigate = useNavigate();
+  const [step, setStep] = useState(0);
+  const [answers, setAnswers] = useState(diagnosticAnswers || {});
+  const [saving, setSaving] = useState(false);
+  const [done, setDone] = useState(diagnosticCompleted);
 
-    const current = QUESTIONS[step];
-    const progress = Math.round(((step) / QUESTIONS.length) * 100);
-    const answeredAll = QUESTIONS.every(q => answers[q.id]);
+  const current = QUESTIONS[step];
+  const progress = Math.round(((step + 1) / QUESTIONS.length) * 100);
+  const answeredAll = QUESTIONS.every((question) => answers[question.id]);
 
-    const selectOption = (val) => {
-        const updated = { ...answers, [current.id]: val };
-        setAnswers(updated);
-        if (step < QUESTIONS.length - 1) {
-            setTimeout(() => setStep(s => s + 1), 300);
-        }
-    };
+  const selectOption = (value) => {
+    setAnswers((currentAnswers) => ({ ...currentAnswers, [current.id]: value }));
+  };
 
-    const handleSave = async () => {
-        setSaving(true);
-        await saveDiagnostic(answers);
-        setSaving(false);
-        setDone(true);
-        setShowEdit(false);
-    };
+  const handleSave = async () => {
+    setSaving(true);
+    await saveDiagnostic(answers);
+    setSaving(false);
+    setDone(true);
+  };
 
-    const handleEdit = () => { setShowEdit(true); setDone(false); setStep(0); };
-
-    if (done) {
-        const stageMap = { idea: 'Idea', validando: 'Validación', vendiendo: 'Tracción', creciendo: 'Crecimiento', escalando: 'Escalamiento' };
-        const stage = stageMap[answers.etapa] || 'Idea';
-        return (
-            <div className="animate-fade-in" style={{ padding: '28px', maxWidth: '700px', margin: '0 auto' }}>
-                <div className="card" style={{ padding: '40px', textAlign: 'center' }}>
-                    <div style={{ fontSize: '60px', marginBottom: '16px' }}>🎉</div>
-                    <h1 style={{ fontSize: '24px', fontWeight: 800, marginBottom: '8px' }}>¡Diagnóstico completado!</h1>
-                    <p style={{ color: 'var(--text-secondary)', marginBottom: '24px' }}>
-                        Basado en tus respuestas, tu etapa es <strong style={{ color: 'var(--primary)' }}>{stage}</strong>.
-                        Te hemos generado una ruta y recomendaciones personalizadas.
-                    </p>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '24px', textAlign: 'left' }}>
-                        {QUESTIONS.map(q => (
-                            <div key={q.id} style={{ padding: '12px 16px', backgroundColor: 'var(--bg-main)', borderRadius: '10px' }}>
-                                <p style={{ fontSize: '11px', color: 'var(--text-tertiary)', fontWeight: 600, marginBottom: '4px' }}>{q.label.replace('¿', '').replace('?', '')}</p>
-                                <p style={{ fontSize: '13px', fontWeight: 700, color: 'var(--primary)' }}>
-                                    {q.options.find(o => o.value === answers[q.id])?.label || '—'}
-                                </p>
-                            </div>
-                        ))}
-                    </div>
-                    <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
-                        <button className="btn btn-secondary" onClick={handleEdit} style={{ gap: '8px' }}>
-                            <Edit size={16} /> Actualizar respuestas
-                        </button>
-                        <button className="btn btn-primary" onClick={() => navigate('/ruta')} style={{ gap: '8px' }}>
-                            Ver mi ruta personalizada →
-                        </button>
-                    </div>
-                </div>
-            </div>
-        );
-    }
-
+  if (done) {
+    const stageMap = { idea: 'Idea', validando: 'Validacion', vendiendo: 'Traccion', creciendo: 'Crecimiento', escalando: 'Escalamiento' };
+    const stage = stageMap[answers.etapa] || 'Idea';
     return (
-        <div className="animate-fade-in" style={{ padding: '28px', maxWidth: '680px', margin: '0 auto' }}>
-            <div style={{ marginBottom: '24px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
-                    <ClipboardList size={22} style={{ color: 'var(--primary)' }} />
-                    <h1 style={{ fontWeight: 800, fontSize: '22px' }}>Diagnóstico Emprendedor</h1>
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                    <div style={{ flex: 1, height: '6px', backgroundColor: 'var(--border)', borderRadius: '6px' }}>
-                        <div style={{ height: '100%', width: `${progress}%`, backgroundColor: 'var(--primary)', borderRadius: '6px', transition: '0.4s ease' }} />
-                    </div>
-                    <span style={{ fontSize: '13px', fontWeight: 700, color: 'var(--primary)', whiteSpace: 'nowrap' }}>
-                        {step + 1} / {QUESTIONS.length}
-                    </span>
-                </div>
-            </div>
-
-            <div className="card animate-fade-in" key={step} style={{ padding: '32px' }}>
-                <h2 style={{ fontSize: '18px', fontWeight: 700, marginBottom: '24px', lineHeight: 1.4 }}>{current.label}</h2>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                    {current.options.map(opt => {
-                        const selected = answers[current.id] === opt.value;
-                        return (
-                            <button key={opt.value} onClick={() => selectOption(opt.value)}
-                                style={{ display: 'flex', alignItems: 'center', gap: '14px', padding: '14px 16px', borderRadius: '10px', border: `2px solid ${selected ? 'var(--primary)' : 'var(--border)'}`, backgroundColor: selected ? '#f0fdf4' : 'white', cursor: 'pointer', textAlign: 'left', transition: 'var(--transition)', fontFamily: 'var(--font-family)' }}
-                                onMouseEnter={e => { if (!selected) { e.currentTarget.style.borderColor = 'var(--primary-light)'; e.currentTarget.style.backgroundColor = '#f9fafb'; } }}
-                                onMouseLeave={e => { if (!selected) { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.backgroundColor = 'white'; } }}>
-                                {selected ? <CheckCircle2 size={20} style={{ color: 'var(--primary)', flexShrink: 0 }} /> : <div style={{ width: '20px', height: '20px', borderRadius: '50%', border: '2px solid var(--border)', flexShrink: 0 }} />}
-                                <div>
-                                    <p style={{ fontWeight: 700, fontSize: '14px' }}>{opt.label}</p>
-                                    <p style={{ fontSize: '12px', color: 'var(--text-secondary)', marginTop: '2px' }}>{opt.desc}</p>
-                                </div>
-                            </button>
-                        );
-                    })}
-                </div>
-
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '24px' }}>
-                    <button className="btn btn-secondary" onClick={() => setStep(s => Math.max(0, s - 1))} disabled={step === 0} style={{ gap: '6px' }}>
-                        <ChevronLeft size={16} /> Anterior
-                    </button>
-                    {step < QUESTIONS.length - 1 ? (
-                        <button className="btn btn-primary" onClick={() => setStep(s => s + 1)} disabled={!answers[current.id]} style={{ gap: '6px' }}>
-                            Siguiente <ChevronRight size={16} />
-                        </button>
-                    ) : (
-                        <button className="btn btn-primary" onClick={handleSave} disabled={!answeredAll || saving} style={{ gap: '6px' }}>
-                            {saving ? 'Guardando...' : '¡Finalizar diagnóstico!'} {!saving && '🎉'}
-                        </button>
-                    )}
-                </div>
-            </div>
-        </div>
+      <div className="page-shell animate-fade-in">
+        <Card style={{ padding: '42px', textAlign: 'center' }}>
+          <Badge tone="mint">Diagnostico completado</Badge>
+          <h1 className="page-title" style={{ marginTop: '14px' }}>Tu etapa base es {stage}</h1>
+          <p className="page-subtitle" style={{ margin: '14px auto 28px' }}>
+            Soe actualizo el contexto para priorizar tareas, oportunidades y seguimiento del mes.
+          </p>
+          <div className="section-grid-2" style={{ marginBottom: '28px', textAlign: 'left' }}>
+            {QUESTIONS.map((question) => (
+              <div key={question.id} style={{ padding: '16px', borderRadius: '16px', border: '1px solid var(--border)', background: 'var(--bg-panel)' }}>
+                <p className="page-kicker">{question.label}</p>
+                <p style={{ fontWeight: 800, marginTop: '6px' }}>
+                  {question.options.find((option) => option.value === answers[question.id])?.label || 'Sin respuesta'}
+                </p>
+              </div>
+            ))}
+          </div>
+          <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
+            <Button variant="secondary" onClick={() => { setDone(false); setStep(0); }}>
+              <Edit size={16} /> Actualizar respuestas
+            </Button>
+            <Button onClick={() => navigate('/ruta')}>Ver plan de accion</Button>
+          </div>
+        </Card>
+      </div>
     );
+  }
+
+  return (
+    <div className="page-shell animate-fade-in">
+      <PageHeader
+        kicker="Diagnostico"
+        title="Radiografia del negocio"
+        subtitle="Seis preguntas para que Soe entienda etapa, bloqueos y prioridades actuales."
+      />
+
+      <Card style={{ padding: '30px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px', marginBottom: '22px' }}>
+          <div style={{ flex: 1 }}>
+            <div className="progress-bg">
+              <div className="progress-fill" style={{ width: `${progress}%` }} />
+            </div>
+          </div>
+          <Badge tone="info">{step + 1} / {QUESTIONS.length}</Badge>
+        </div>
+
+        <h2 className="display-font" style={{ fontSize: '32px', fontWeight: 600, lineHeight: 1.2, marginBottom: '22px' }}>
+          {current.label}
+        </h2>
+
+        <div style={{ display: 'grid', gap: '10px' }}>
+          {current.options.map((option) => {
+            const selected = answers[current.id] === option.value;
+            return (
+              <button
+                key={option.value}
+                onClick={() => selectOption(option.value)}
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: '24px 1fr',
+                  gap: '12px',
+                  alignItems: 'start',
+                  padding: '16px',
+                  borderRadius: '18px',
+                  border: `1px solid ${selected ? 'var(--primary)' : 'var(--border)'}`,
+                  background: selected ? 'var(--primary-light)' : '#fff',
+                  textAlign: 'left',
+                }}
+              >
+                <span
+                  style={{
+                    width: '20px',
+                    height: '20px',
+                    borderRadius: '50%',
+                    border: `2px solid ${selected ? 'var(--primary)' : 'var(--border-strong)'}`,
+                    background: selected ? 'var(--primary)' : '#fff',
+                    color: '#fff',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    marginTop: '3px',
+                  }}
+                >
+                  {selected ? <CheckCircle2 size={14} /> : null}
+                </span>
+                <span>
+                  <span style={{ display: 'block', fontWeight: 800 }}>{option.label}</span>
+                  <span style={{ display: 'block', color: 'var(--text-secondary)', fontSize: '14px', marginTop: '3px' }}>{option.desc}</span>
+                </span>
+              </button>
+            );
+          })}
+        </div>
+
+        <div style={{ display: 'flex', justifyContent: 'space-between', gap: '12px', marginTop: '26px', flexWrap: 'wrap' }}>
+          <Button variant="secondary" onClick={() => setStep((value) => Math.max(0, value - 1))} disabled={step === 0}>
+            <ChevronLeft size={16} /> Anterior
+          </Button>
+          {step < QUESTIONS.length - 1 ? (
+            <Button onClick={() => setStep((value) => value + 1)} disabled={!answers[current.id]}>
+              Siguiente <ChevronRight size={16} />
+            </Button>
+          ) : (
+            <Button onClick={handleSave} disabled={!answeredAll || saving}>
+              {saving ? 'Guardando...' : 'Finalizar diagnostico'}
+            </Button>
+          )}
+        </div>
+      </Card>
+    </div>
+  );
 }

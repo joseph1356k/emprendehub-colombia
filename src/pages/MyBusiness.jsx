@@ -5,7 +5,7 @@ import { useApp } from '../context/AppContext';
 const LOOKING_OPTIONS = [
     { id: 'capital', label: '💰 Capital' }, { id: 'clientes', label: '👥 Clientes' },
     { id: 'aliados', label: '🤝 Aliados' }, { id: 'proveedores', label: '📦 Proveedores' },
-    { id: 'mentoria', label: '🧭 Mentoría' },
+    { id: 'direccion', label: 'Dirección' },
 ];
 
 export default function MyBusiness() {
@@ -40,15 +40,16 @@ export default function MyBusiness() {
     };
 
     return (
-        <div className="animate-fade-in" style={{ padding: '28px', maxWidth: '960px' }}>
+        <div className="page-shell animate-fade-in">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '28px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
                     <div style={{ padding: '10px', backgroundColor: '#f0fdf4', borderRadius: '12px' }}>
                         <Building size={22} style={{ color: 'var(--primary)' }} />
                     </div>
                     <div>
-                        <h1 style={{ fontSize: '22px', fontWeight: 800 }}>Mi Negocio</h1>
-                        <p style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>Tu perfil público en la red EmprendeHub.</p>
+                        <p className="page-kicker">Mi negocio</p>
+                        <h1 className="page-title" style={{ fontSize: '34px' }}>Perfil del negocio</h1>
+                        <p style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>Tu perfil público en la red Soe.</p>
                     </div>
                 </div>
                 <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
@@ -74,7 +75,7 @@ export default function MyBusiness() {
                         <div style={{ textAlign: 'center', padding: '40px 20px' }}>
                             <p style={{ fontSize: '48px', marginBottom: '12px' }}>🏢</p>
                             <h2 style={{ fontWeight: 700, marginBottom: '8px' }}>Crea tu perfil de negocio</h2>
-                            <p style={{ color: 'var(--text-secondary)', marginBottom: '20px' }}>Hazte visible en la red EmprendeHub y conecta con aliados, clientes e inversionistas.</p>
+                            <p style={{ color: 'var(--text-secondary)', marginBottom: '20px' }}>Hazte visible en la red Soe y conecta con aliados, clientes e inversionistas.</p>
                             <button className="btn btn-primary" onClick={() => setEditing(true)}>Crear perfil ahora →</button>
                         </div>
                     )}

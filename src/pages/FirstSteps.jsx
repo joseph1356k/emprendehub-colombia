@@ -2,24 +2,24 @@ import React, { useState } from 'react';
 import { CheckCircle2, Circle, ChevronDown, ChevronUp, CheckSquare, ExternalLink } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 
-const FIRST_STEPS_SECTIONS = ['Formalización', 'Producto / Servicio', 'Financiero', 'Mercadeo'];
+const FIRST_STEPS_SECTIONS = ['Formalizacion', 'Producto / Servicio', 'Financiero', 'Mercadeo'];
 
 const STEP_INFO = {
     'Registrar RUT en DIAN': { emoji: '📄', url: 'https://www.dian.gov.co/', tip: 'Trámite gratuito y 100% en línea desde la página de la DIAN.' },
     'Crear empresa (SAS o Persona Natural)': { emoji: '🏛️', url: 'https://www.ccb.org.co/', tip: 'La SAS es la figura más flexible para startups en Colombia.' },
-    'Registro en Cámara de Comercio': { emoji: '📋', url: 'https://www.ccb.org.co/', tip: 'La matrícula mercantil te da identidad legal como empresa.' },
+    'Registro en Camara de Comercio': { emoji: '📋', url: 'https://www.ccb.org.co/', tip: 'La matricula mercantil te da identidad legal como empresa.' },
     'Abrir cuenta bancaria empresarial': { emoji: '🏦', url: '#', tip: 'Separa las finanzas personales de las empresariales desde el inicio.' },
     'Definir propuesta de valor': { emoji: '💡', url: '#', tip: 'Usa el Value Proposition Canvas de Strategyzer para estructurarla.' },
     'Construir o definir MVP': { emoji: '🔧', url: '#', tip: 'El MVP debe validar tu hipótesis central con el menor esfuerzo posible.' },
-    'Realizar 10 entrevistas de usuario': { emoji: '🎤', url: '#', tip: 'Usa preguntas abiertas. Nunca preguntes "¿usarías esto?" — observa comportamientos.' },
+    'Realizar 10 entrevistas de usuario': { emoji: '🎤', url: '#', tip: 'Usa preguntas abiertas. Nunca preguntes "usarias esto"; observa comportamientos.' },
     'Iterar producto con feedback recibido': { emoji: '🔄', url: '#', tip: 'Documenta cada aprendizaje. Cada iteración debe tener una hipótesis clara.' },
     'Definir modelo de ingresos': { emoji: '💰', url: '#', tip: 'Explora: suscripción, comisión, freemium, venta directa, licencia.' },
-    'Armar proyecciones financieras básicas': { emoji: '📊', url: '#', tip: 'Proyecta a 12 meses mínimo: ingresos, costos fijos, variables y punto de equilibrio.' },
+    'Armar proyecciones financieras basicas': { emoji: '📊', url: '#', tip: 'Proyecta a 12 meses minimo: ingresos, costos fijos, variables y punto de equilibrio.' },
     'Calcular punto de equilibrio': { emoji: '⚖️', url: '#', tip: 'Punto de equilibrio = Costos Fijos / (Precio - Costo Variable Unitario)' },
     'Definir buyer persona': { emoji: '👤', url: '#', tip: 'Incluye: nombre ficticio, edad, trabajo, frustraciones, objetivos y dónde se informa.' },
     'Crear perfiles en redes sociales': { emoji: '📱', url: '#', tip: 'Elige 1-2 plataformas donde esté tu audiencia. No intentes estar en todas.' },
-    'Definir canales de adquisición': { emoji: '📡', url: '#', tip: 'Prueba 2-3 canales en paralelo. Mide y dobla en el que funcione.' },
-    'Diseñar identidad de marca básica': { emoji: '🎨', url: '#', tip: 'Usa Canva para crear logo, paleta de colores y tipografía consistente.' },
+    'Definir canales de adquisicion': { emoji: '📡', url: '#', tip: 'Prueba 2-3 canales en paralelo. Mide y dobla en el que funcione.' },
+    'Disenar identidad de marca basica': { emoji: '🎨', url: '#', tip: 'Usa Canva para crear logo, paleta de colores y tipografia consistente.' },
 };
 
 export default function FirstSteps() {
@@ -43,7 +43,7 @@ export default function FirstSteps() {
     };
 
     return (
-        <div className="animate-fade-in" style={{ padding: '28px', maxWidth: '800px' }}>
+        <div className="page-shell animate-fade-in">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '28px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                     <div style={{ padding: '10px', backgroundColor: '#f0fdf4', borderRadius: '12px' }}>

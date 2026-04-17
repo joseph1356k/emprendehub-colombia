@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Play, RotateCcw, CheckCircle2, BookOpen, Award, Zap } from 'lucide-react';
+import { Play, RotateCcw, CheckCircle2 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { MOCK_COURSES } from '../data/mockData';
 
@@ -34,14 +34,13 @@ export default function Courses() {
     };
 
     const totalStarted = coursesWithProgress.filter(c => c.isStarted).length;
-    const overallPct = MOCK_COURSES.length > 0 ? Math.round((completedCourses / MOCK_COURSES.length) * 100) : 0;
-
     return (
-        <div className="animate-fade-in" style={{ padding: '28px' }}>
+        <div className="page-shell animate-fade-in">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '24px' }}>
                 <div>
-                    <h1 style={{ fontSize: '22px', fontWeight: 800, marginBottom: '4px' }}>Cursos</h1>
-                    <p style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>Formación práctica para emprendedores colombianos.</p>
+                    <p className="page-kicker">Biblioteca</p>
+                    <h1 className="page-title" style={{ marginTop: '8px' }}>Cursos</h1>
+                    <p className="page-subtitle" style={{ marginTop: '8px' }}>Aprendizaje practico conectado con las decisiones del plan.</p>
                 </div>
                 <div style={{ display: 'flex', gap: '12px' }}>
                     <div style={{ textAlign: 'center', padding: '10px 16px', backgroundColor: '#f0fdf4', borderRadius: '10px', border: '1px solid #bbf7d0' }}>

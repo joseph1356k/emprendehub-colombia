@@ -18,10 +18,11 @@ export default function Providers() {
     const providerDetail = MOCK_PROVIDERS.find(p => p.id === profileId);
 
     return (
-        <div className="animate-fade-in" style={{ padding: '28px' }}>
+        <div className="page-shell animate-fade-in">
             <div style={{ marginBottom: '24px' }}>
-                <h1 style={{ fontSize: '22px', fontWeight: 800, marginBottom: '4px' }}>Empresas & Servicios</h1>
-                <p style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>Directorio de proveedores que apoyan a emprendedores colombianos.</p>
+                <p className="page-kicker">Red experta</p>
+                <h1 className="page-title" style={{ marginTop: '8px' }}>Empresas y servicios</h1>
+                <p className="page-subtitle" style={{ marginTop: '8px' }}>Perfiles que apoyan decisiones, ejecucion y crecimiento del negocio.</p>
             </div>
 
             {/* Search + Filters */}
