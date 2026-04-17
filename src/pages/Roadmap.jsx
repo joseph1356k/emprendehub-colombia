@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { Check, FileText, Lock, Upload, Wand2, X } from 'lucide-react';
 import { Badge, Button, Card, EmptyState, PageHeader } from '../components/ui';
 import { useApp } from '../context/AppContext';
@@ -24,7 +25,16 @@ function TaskDetailModal({ task, onClose }) {
   if (!task) return null;
 
   const docState = getTaskDocumentStatus(task);
-  const nextStatus = task.status === 'completado' ? 'pendiente' : task.status === 'pendiente' ? 'en progreso' : 'completado';
+  const nextStatus =
+    task.status === 'completado'
+      ? 'pendiente'
+      : task.status === 'pendiente' || task.status === 'bloqueado'
+      ? 'en progreso'
+      : 'completado';
+  const unblockText =
+    docState.required && docState.status !== 'Subido'
+      ? `Para desbloquearla, registra el ${docState.requirement.docType} o genera una plantilla para empezar.`
+      : 'Para desbloquearla, cambia el estado a en progreso y define la siguiente accion concreta.';
 
   const run = async (fn) => {
     setWorking(true);
@@ -60,7 +70,10 @@ function TaskDetailModal({ task, onClose }) {
         {task.status === 'bloqueado' ? (
           <div style={{ display: 'flex', gap: '10px', padding: '14px', borderRadius: '16px', border: '1px solid #efd8a7', background: '#fffaf0', marginBottom: '16px' }}>
             <Lock size={18} style={{ color: '#8a6730', flexShrink: 0 }} />
-            <p style={{ color: '#8a6730', fontSize: '14px' }}>Esta tarea necesita resolver un requisito previo antes de avanzar.</p>
+            <div>
+              <p style={{ color: '#8a6730', fontSize: '14px', fontWeight: 800 }}>Esta tarea esta bloqueada.</p>
+              <p style={{ color: '#8a6730', fontSize: '14px', marginTop: '4px' }}>{unblockText}</p>
+            </div>
           </div>
         ) : null}
 
@@ -141,7 +154,8 @@ function TaskItem({ task, onToggle, onOpen, busy }) {
 
 export default function Roadmap() {
   const { tasks, progressPercent, completedTasks, totalTasks, profile, updateTask } = useApp();
-  const [selectedTask, setSelectedTask] = useState(null);
+  const location = useLocation();
+  const [selectedTaskId, setSelectedTaskId] = useState(() => location.state?.focusTaskId || null);
   const [busyId, setBusyId] = useState(null);
 
   const grouped = useMemo(() => {
@@ -151,6 +165,11 @@ export default function Roadmap() {
       return acc;
     }, {});
   }, [tasks]);
+
+  const selectedTask = useMemo(
+    () => tasks.find((item) => item.id === selectedTaskId) || null,
+    [selectedTaskId, tasks]
+  );
 
   const toggleTask = async (task) => {
     setBusyId(task.id);
@@ -198,7 +217,7 @@ export default function Roadmap() {
                     key={task.id}
                     task={task}
                     onToggle={toggleTask}
-                    onOpen={setSelectedTask}
+                    onOpen={(item) => setSelectedTaskId(item.id)}
                     busy={busyId === task.id}
                   />
                 ))}
@@ -208,7 +227,7 @@ export default function Roadmap() {
         </div>
       )}
 
-      <TaskDetailModal task={selectedTask} onClose={() => setSelectedTask(null)} />
+      <TaskDetailModal task={selectedTask} onClose={() => setSelectedTaskId(null)} />
     </div>
   );
 }

@@ -6,7 +6,7 @@ import { useApp } from '../context/AppContext';
 const TABS = [
   { to: '/dashboard', label: 'Inicio', active: ['/dashboard'] },
   { to: '/mi-agente', label: 'Mi agente', active: ['/mi-agente'] },
-  { to: '/ruta', label: 'Plan de acción', active: ['/ruta', '/primeros-pasos'] },
+  { to: '/ruta', label: 'Plan de accion', active: ['/ruta', '/primeros-pasos'] },
 ];
 
 export default function Topbar({ toggleSidebar, onLogout }) {
@@ -33,7 +33,7 @@ export default function Topbar({ toggleSidebar, onLogout }) {
         <Menu size={20} />
       </button>
 
-      <nav className="topbar-tabs" aria-label="Navegación principal">
+      <nav className="topbar-tabs" aria-label="Navegacion principal">
         {TABS.map((tab) => {
           const active = tab.active.some((path) => location.pathname === path);
           return (
@@ -106,7 +106,7 @@ export default function Topbar({ toggleSidebar, onLogout }) {
             >
               <div style={{ padding: '10px 10px 14px', borderBottom: '1px solid var(--border)', marginBottom: '6px' }}>
                 <p style={{ fontWeight: 800 }}>{displayName}</p>
-                <p style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>{profile?.stage || 'Idea'} · {level}</p>
+                <p style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>{profile?.stage || 'Idea'} - {level}</p>
               </div>
               <button
                 className="sidebar-link"
@@ -125,7 +125,7 @@ export default function Topbar({ toggleSidebar, onLogout }) {
                 }}
                 style={{ color: 'var(--status-error)' }}
               >
-                <LogOut size={16} /> Cerrar sesión
+                <LogOut size={16} /> Cerrar sesion
               </button>
             </div>
           ) : null}

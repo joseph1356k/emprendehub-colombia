@@ -1,4 +1,4 @@
-﻿import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Bell, BellOff, CheckCheck, Filter, VolumeX, Volume2 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import PageHeader from '../components/PageHeader';

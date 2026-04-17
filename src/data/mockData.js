@@ -1,4 +1,4 @@
-﻿export const DEFAULT_TASKS = [
+export const DEFAULT_TASKS = [
   { section: 'Formalizacion', title: 'Registrar RUT en DIAN', priority: 'Alta', due_in_days: 4 },
   { section: 'Formalizacion', title: 'Crear empresa (SAS o Persona Natural)', priority: 'Alta', due_in_days: 6 },
   { section: 'Formalizacion', title: 'Registro en Camara de Comercio', priority: 'Alta', due_in_days: 8 },

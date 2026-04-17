@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { Bookmark, BookmarkCheck, ExternalLink, Search, X } from 'lucide-react';
 import { Badge, Button, Card, EmptyState, Input, PageHeader } from '../components/ui';
 import { useApp } from '../context/AppContext';
@@ -6,11 +7,12 @@ import { MOCK_OPPORTUNITIES, STAGES } from '../data/mockData';
 
 export default function Opportunities() {
   const { savedOpportunities, toggleSaveOpportunity, profile, showToast } = useApp();
+  const location = useLocation();
   const [search, setSearch] = useState('');
   const [stageFilter, setStageFilter] = useState('Todos');
   const [typeFilter, setTypeFilter] = useState('Todos');
   const [tab, setTab] = useState('todas');
-  const [detailId, setDetailId] = useState(null);
+  const [detailId, setDetailId] = useState(() => location.state?.focusOpportunityId || null);
 
   const userStage = profile?.stage || 'Idea';
   const detail = MOCK_OPPORTUNITIES.find((item) => item.id === detailId);

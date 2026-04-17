@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { CalendarClock, Check, Circle, SquareCheckBig, TrendingUp } from 'lucide-react';
+import { AlertTriangle, ArrowRight, CalendarClock, Check, Circle, FileText, SquareCheckBig, Target, TrendingUp } from 'lucide-react';
 import { Badge, Button, Card, EmptyState, PageHeader, StatCard } from '../components/ui';
 import { useApp } from '../context/AppContext';
 import { MOCK_OPPORTUNITIES } from '../data/mockData';
@@ -41,6 +41,7 @@ export default function Dashboard() {
     completedTasks,
     totalTasks,
     todayPlan,
+    nextAction,
     updateTask,
     continueToNextAction,
   } = useApp();
@@ -120,6 +121,89 @@ export default function Dashboard() {
           onClick={() => navigate('/mi-agente')}
         />
       </div>
+
+      <Card style={{ marginBottom: '24px', padding: '28px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', gap: '18px', alignItems: 'flex-start', flexWrap: 'wrap', marginBottom: '22px' }}>
+          <div>
+            <p className="page-kicker">Que hago hoy</p>
+            <h2 className="page-title" style={{ fontSize: '34px', marginTop: '8px' }}>Tres acciones para mover el negocio</h2>
+            <p className="page-subtitle" style={{ marginTop: '8px' }}>
+              Soe prioriza por bloqueo, fecha, etapa y velocidad de avance.
+            </p>
+          </div>
+          <Button onClick={() => continueToNextAction(navigate)}>
+            {nextAction.label} <ArrowRight size={16} />
+          </Button>
+        </div>
+
+        <div className="section-grid-2" style={{ alignItems: 'start' }}>
+          <div style={{ display: 'grid', gap: '10px' }}>
+            {todayPlan.topTasks.length === 0 ? (
+              <EmptyState title="No hay tareas pendientes" description="Tu siguiente ciclo se activara cuando agregues nuevas prioridades." />
+            ) : (
+              todayPlan.topTasks.map((task, index) => (
+                <button
+                  key={task.id}
+                  onClick={() => navigate('/ruta', { state: { focusTaskId: task.id, source: 'today-plan' } })}
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: '34px 1fr auto',
+                    gap: '12px',
+                    alignItems: 'center',
+                    padding: '14px',
+                    borderRadius: '16px',
+                    border: '1px solid var(--border)',
+                    background: index === 0 ? 'var(--primary-light)' : '#fff',
+                    textAlign: 'left',
+                  }}
+                >
+                  <span className="display-font" style={{ color: 'var(--primary)', fontSize: '24px', lineHeight: 1 }}>
+                    {index + 1}
+                  </span>
+                  <span>
+                    <span style={{ display: 'block', fontWeight: 800 }}>{task.title}</span>
+                    <span style={{ display: 'block', color: 'var(--text-secondary)', fontSize: '13px' }}>
+                      {task.scoreBreakdown?.length ? task.scoreBreakdown.join(' / ') : `${task.priority} prioridad`}
+                    </span>
+                  </span>
+                  <Badge tone={task.status === 'bloqueado' ? 'warning' : task.documentStatus === 'Pendiente' ? 'info' : 'neutral'}>
+                    {task.status === 'bloqueado' ? 'Bloqueo' : task.documentStatus === 'Pendiente' ? 'Documento' : 'Accion'}
+                  </Badge>
+                </button>
+              ))
+            )}
+          </div>
+
+          <div style={{ display: 'grid', gap: '12px' }}>
+            <div style={{ padding: '15px', borderRadius: '16px', border: '1px solid var(--border)', background: todayPlan.blocker ? '#fffaf0' : 'var(--bg-panel)' }}>
+              <p style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 800 }}>
+                <AlertTriangle size={16} /> Bloqueo principal
+              </p>
+              <p style={{ color: 'var(--text-secondary)', marginTop: '6px' }}>
+                {todayPlan.blocker ? todayPlan.blocker.title : 'No hay bloqueos activos hoy.'}
+              </p>
+            </div>
+            <div style={{ padding: '15px', borderRadius: '16px', border: '1px solid var(--border)', background: 'var(--bg-panel)' }}>
+              <p style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 800 }}>
+                <Target size={16} /> Oportunidad recomendada
+              </p>
+              <p style={{ color: 'var(--text-secondary)', marginTop: '6px' }}>
+                {todayPlan.recommendedOpportunity?.title || 'Sin recomendacion activa por ahora.'}
+              </p>
+            </div>
+            <div style={{ padding: '15px', borderRadius: '16px', border: '1px solid var(--border)', background: todayPlan.missingDocument ? 'var(--mint-soft)' : 'var(--bg-panel)' }}>
+              <p style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 800 }}>
+                <FileText size={16} /> Documento faltante
+              </p>
+              <p style={{ color: 'var(--text-secondary)', marginTop: '6px' }}>
+                {todayPlan.missingDocument
+                  ? `${todayPlan.missingDocument.documentRequirement?.docType} para ${todayPlan.missingDocument.title}`
+                  : 'No hay documentos obligatorios pendientes.'}
+              </p>
+            </div>
+          </div>
+        </div>
+      </Card>
 
       <div className="section-grid-2" style={{ marginBottom: '20px' }}>
         <Card>

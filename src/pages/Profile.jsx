@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Bell, Bookmark, Lock, Save, User } from 'lucide-react';
 import { Badge, Button, Card, EmptyState, Input, Label, PageHeader } from '../components/ui';
 import { useApp } from '../context/AppContext';
+import { supabase } from '../lib/supabase';
 
 const SECTIONS = [
   { id: 'info', label: 'Datos', icon: <User size={16} /> },
@@ -11,7 +12,7 @@ const SECTIONS = [
 ];
 
 export default function Profile() {
-  const { profile, updateProfile, savedOpportunities, savedProviders } = useApp();
+  const { profile, updateProfile, savedOpportunities, savedProviders, session, showToast } = useApp();
   const [activeSection, setActiveSection] = useState('info');
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -32,6 +33,43 @@ export default function Profile() {
     await updateProfile(form);
     setSaving(false);
     setEditing(false);
+  };
+
+  const handlePasswordUpdate = async () => {
+    if (!session?.user?.email) {
+      showToast('No hay una sesion activa para actualizar seguridad.', 'error');
+      return;
+    }
+    if (!pwForm.current || !pwForm.nueva || !pwForm.confirmar) {
+      showToast('Completa los tres campos de seguridad.', 'error');
+      return;
+    }
+    if (pwForm.nueva.length < 6) {
+      showToast('La nueva contrasena debe tener minimo 6 caracteres.', 'error');
+      return;
+    }
+    if (pwForm.nueva !== pwForm.confirmar) {
+      showToast('La confirmacion no coincide.', 'error');
+      return;
+    }
+
+    const { error: signInError } = await supabase.auth.signInWithPassword({
+      email: session.user.email,
+      password: pwForm.current,
+    });
+    if (signInError) {
+      showToast('La contrasena actual no coincide.', 'error');
+      return;
+    }
+
+    const { error } = await supabase.auth.updateUser({ password: pwForm.nueva });
+    if (error) {
+      showToast(error.message || 'No se pudo actualizar la contrasena.', 'error');
+      return;
+    }
+
+    setPwForm({ current: '', nueva: '', confirmar: '' });
+    showToast('Contrasena actualizada');
   };
 
   const renderInfo = () => (
@@ -115,7 +153,9 @@ export default function Profile() {
             <Input type="password" value={pwForm[key]} placeholder="••••••••" onChange={(event) => setPwForm((current) => ({ ...current, [key]: event.target.value }))} />
           </div>
         ))}
-        <Button style={{ justifySelf: 'start' }}>Actualizar contrasena</Button>
+        <Button type="button" onClick={handlePasswordUpdate} style={{ justifySelf: 'start' }}>
+          Actualizar contrasena
+        </Button>
       </div>
     </Card>
   );
