@@ -1,126 +1,174 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { CheckCircle2, ChevronLeft, ChevronRight, Edit } from 'lucide-react';
+import { CheckCircle2, ChevronLeft, ChevronRight, Edit, Sparkles } from 'lucide-react';
 import { Badge, Button, Card, PageHeader } from '../components/ui';
 import { useApp } from '../context/AppContext';
+import { DIAGNOSTIC_QUESTIONS } from '../data/diagnostic';
+import { spanishText } from '../utils/spanishText';
 
-const QUESTIONS = [
-  {
-    id: 'etapa',
-    label: '¿En qué etapa se encuentra tu negocio?',
-    options: [
-      { value: 'idea', label: 'Tengo una idea', desc: 'Estoy explorando y definiendo el concepto.' },
-      { value: 'validando', label: 'Estoy validando', desc: 'Tengo prototipo o primeras conversaciones con clientes.' },
-      { value: 'vendiendo', label: 'Ya genero ingresos', desc: 'Tengo clientes que pagan con cierta recurrencia.' },
-      { value: 'creciendo', label: 'Estoy creciendo', desc: 'Tengo equipo y necesito ordenar operaciónes.' },
-      { value: 'escalando', label: 'Estoy escalando', desc: 'Busco nuevos mercados, capital o estructura directiva.' },
-    ],
-  },
-  {
-    id: 'formalizacion',
-    label: '¿Qué tan formalizado está tu negocio?',
-    options: [
-      { value: 'ninguna', label: 'Sin formalizacion', desc: 'Aún no tengo RUT ni matrícula mercantil.' },
-      { value: 'en-proceso', label: 'En proceso', desc: 'Estoy iniciando trámites.' },
-      { value: 'parcial', label: 'Parcialmente formal', desc: 'Algunos requisitos ya están listos.' },
-      { value: 'completa', label: 'Completamente formal', desc: 'RUT, cámara y documentos principales al día.' },
-    ],
-  },
-  {
-    id: 'necesidad',
-    label: '¿Cuál es la decisión más importante ahora?',
-    options: [
-      { value: 'capital', label: 'Capital o caja', desc: 'Necesito financiar crecimiento o estabilizar flujo.' },
-      { value: 'validacion', label: 'Producto y validacion', desc: 'Debo confirmar si la oferta funciona.' },
-      { value: 'clientes', label: 'Clientes y ventas', desc: 'Necesito mejorar adquisición y conversión.' },
-      { value: 'equipo', label: 'Equipo y roles', desc: 'Debo decidir que contratar o tercerizar.' },
-      { value: 'direccion', label: 'Dirección y criterio externo', desc: 'Necesito claridad para decidir con menos ruido.' },
-    ],
-  },
-  {
-    id: 'equipo',
-    label: '¿Cómo está armado tu equipo?',
-    options: [
-      { value: 'solo', label: 'Solo por ahora', desc: 'Soy fundador individual.' },
-      { value: 'cofounders', label: 'Equipo fundador pequeño', desc: 'Tengo 1 o 2 socios activos.' },
-      { value: 'pequeño', label: 'Equipo operativo pequeño', desc: 'Trabajamos entre 3 y 5 personas.' },
-      { value: 'mediano', label: 'Equipo establecido', desc: 'Más de 5 personas sostienen la operación.' },
-    ],
-  },
-  {
-    id: 'ingresos',
-    label: '¿Cuánto genera actualmente?',
-    options: [
-      { value: 'cero', label: 'Aún no genera ingresos', desc: 'Estoy antes de ventas recurrentes.' },
-      { value: 'bajo', label: 'Hasta $5M COP/mes', desc: 'Primeras ventas.' },
-      { value: 'medio', label: '$5M - $20M COP/mes', desc: 'Traccion inicial.' },
-      { value: 'alto', label: 'Más de $20M COP/mes', desc: 'Traccion comprobada.' },
-    ],
-  },
-  {
-    id: 'recursos',
-    label: '¿Qué recurso destrabaría más avance?',
-    options: [
-      { value: 'herramientas', label: 'Herramientas y plantillas', desc: 'Necesito bajar ideas a ejecución.' },
-      { value: 'red', label: 'Red y alianzas', desc: 'Necesito abrir conversaciones correctas.' },
-      { value: 'financiacion', label: 'Financiación', desc: 'Necesito oportunidades de capital o crédito.' },
-      { value: 'formacion', label: 'Aprendizaje práctico', desc: 'Necesito fortalecer habilidades concretas.' },
-    ],
-  },
-];
+function ScoreBar({ label, value }) {
+  return (
+    <div style={{ display: 'grid', gridTemplateColumns: '120px 1fr 38px', gap: '12px', alignItems: 'center' }}>
+      <span style={{ color: 'var(--text-secondary)', fontWeight: 700 }}>{label}</span>
+      <div className="progress-bg" style={{ height: '8px' }}>
+        <div className="progress-fill" style={{ width: `${Math.min(100, Number(value || 0) * 10)}%` }} />
+      </div>
+      <span style={{ color: 'var(--primary)', fontWeight: 800 }}>{value}/10</span>
+    </div>
+  );
+}
+
+function PlanPreview({ plan, onEdit, onApprove, saving, primaryLabel = 'Aprobar plan' }) {
+  const scores = plan?.scores || {};
+  const snapshot = plan?.snapshot || {};
+  const tasks = plan?.recommendedTasks || [];
+
+  return (
+    <div className="page-shell animate-fade-in">
+      <PageHeader
+        kicker="Plan recomendado por SOE"
+        title="Radiografía accionable del negocio"
+        subtitle="SOE propone un plan de 30 días. Puedes aprobarlo para reemplazar tareas pendientes y conservar lo que ya completaste."
+        actionSecondary={
+          <Button variant="secondary" onClick={onEdit}>
+            <Edit size={16} /> Ajustar respuestas
+          </Button>
+        }
+        action={
+          <Button onClick={onApprove} disabled={saving}>
+            {saving ? 'Guardando...' : primaryLabel}
+          </Button>
+        }
+      />
+
+      <div className="section-grid-2" style={{ marginBottom: '22px' }}>
+        <Card>
+          <Badge tone="mint">Diagnóstico base</Badge>
+          <h2 className="page-title" style={{ fontSize: '30px', marginTop: '14px' }}>
+            {snapshot.monthlyPriority || 'Prioridad del mes'}
+          </h2>
+          <p className="page-subtitle" style={{ marginTop: '10px' }}>
+            {snapshot.agentRecommendation || 'SOE recomienda concentrar la ejecución antes de abrir nuevos frentes.'}
+          </p>
+          <div style={{ display: 'grid', gap: '10px', marginTop: '18px' }}>
+            <p><strong>Etapa:</strong> {spanishText(snapshot.stage || 'Idea')}</p>
+            <p><strong>Bloqueo:</strong> {snapshot.mainBlocker || 'Falta claridad estratégica'}</p>
+            <p><strong>Riesgo:</strong> {snapshot.currentRisk || 'Dispersión de prioridades.'}</p>
+          </div>
+        </Card>
+
+        <Card>
+          <p className="page-kicker" style={{ marginBottom: '16px' }}>Estado por áreas</p>
+          <div style={{ display: 'grid', gap: '14px' }}>
+            {Object.entries(scores).map(([label, value]) => (
+              <ScoreBar key={label} label={label} value={value} />
+            ))}
+          </div>
+        </Card>
+      </div>
+
+      <Card>
+        <div style={{ display: 'flex', justifyContent: 'space-between', gap: '14px', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap' }}>
+          <div>
+            <p className="page-kicker">Plan de acción propuesto</p>
+            <h2 style={{ fontSize: '22px', fontWeight: 800, marginTop: '6px' }}>{tasks.length} tareas recomendadas</h2>
+          </div>
+          <Badge tone="info">{plan?.model?.includes('fallback') ? 'Plan local' : 'IA + criterio SOE'}</Badge>
+        </div>
+
+        <div style={{ display: 'grid', gap: '12px' }}>
+          {tasks.map((task, index) => (
+            <div
+              key={`${task.title}-${index}`}
+              style={{
+                display: 'grid',
+                gridTemplateColumns: '34px minmax(0, 1fr) auto',
+                gap: '14px',
+                padding: '16px',
+                borderRadius: '18px',
+                border: '1px solid var(--border)',
+                background: index < 3 ? 'var(--primary-light)' : '#fff',
+              }}
+            >
+              <span className="display-font" style={{ color: 'var(--primary)', fontSize: '26px', lineHeight: 1 }}>{index + 1}</span>
+              <div>
+                <p style={{ fontWeight: 800 }}>{task.title}</p>
+                <p style={{ color: 'var(--text-secondary)', marginTop: '5px' }}>{task.rationale}</p>
+                <p style={{ color: 'var(--text-secondary)', fontSize: '13px', marginTop: '6px' }}>
+                  Resultado: {task.expectedOutcome}
+                </p>
+              </div>
+              <div style={{ display: 'grid', justifyItems: 'end', gap: '8px' }}>
+                <Badge tone={task.priority === 'Alta' ? 'warning' : 'neutral'}>{task.priority}</Badge>
+                <span style={{ color: 'var(--text-secondary)', fontSize: '13px' }}>{task.dueDate}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </Card>
+    </div>
+  );
+}
 
 export default function Diagnostic() {
-  const { diagnosticAnswers, diagnosticCompleted, saveDiagnostic } = useApp();
+  const { diagnosticAnswers, diagnosticCompleted, latestDiagnosticRun, requestDiagnosticPlan, saveDiagnostic } = useApp();
   const navigate = useNavigate();
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState(diagnosticAnswers || {});
+  const [plan, setPlan] = useState(latestDiagnosticRun || null);
   const [saving, setSaving] = useState(false);
-  const [done, setDone] = useState(diagnosticCompleted);
+  const [mode, setMode] = useState(diagnosticCompleted && latestDiagnosticRun ? 'summary' : 'questions');
 
-  const current = QUESTIONS[step];
-  const progress = Math.round(((step + 1) / QUESTIONS.length) * 100);
-  const answeredAll = QUESTIONS.every((question) => answers[question.id]);
+  const current = DIAGNOSTIC_QUESTIONS[step];
+  const progress = Math.round(((step + 1) / DIAGNOSTIC_QUESTIONS.length) * 100);
+  const answeredCount = useMemo(
+    () => DIAGNOSTIC_QUESTIONS.filter((question) => answers[question.id]).length,
+    [answers]
+  );
+  const answeredAll = answeredCount === DIAGNOSTIC_QUESTIONS.length;
 
   const selectOption = (value) => {
     setAnswers((currentAnswers) => ({ ...currentAnswers, [current.id]: value }));
   };
 
-  const handleSave = async () => {
+  const generatePlan = async () => {
     setSaving(true);
-    await saveDiagnostic(answers);
+    const generated = await requestDiagnosticPlan(answers);
+    setPlan(generated);
+    setMode('plan');
     setSaving(false);
-    setDone(true);
   };
 
-  if (done) {
-    const stageMap = { idea: 'Idea', validando: 'Validacion', vendiendo: 'Traccion', creciendo: 'Crecimiento', escalando: 'Escalamiento' };
-    const stage = stageMap[answers.etapa] || 'Idea';
+  const approvePlan = async () => {
+    setSaving(true);
+    const result = await saveDiagnostic(answers, plan);
+    setSaving(false);
+    if (!result?.error) navigate('/dashboard');
+  };
+
+  if (mode === 'plan' && plan) {
     return (
-      <div className="page-shell animate-fade-in">
-        <Card style={{ padding: '42px', textAlign: 'center' }}>
-          <Badge tone="mint">Diagnóstico completado</Badge>
-          <h1 className="page-title" style={{ marginTop: '14px' }}>Tu etapa base es {stage}</h1>
-          <p className="page-subtitle" style={{ margin: '14px auto 28px' }}>
-            SOE actualizó el contexto para priorizar tareas, oportunidades y seguimiento del mes.
-          </p>
-          <div className="section-grid-2" style={{ marginBottom: '28px', textAlign: 'left' }}>
-            {QUESTIONS.map((question) => (
-              <div key={question.id} style={{ padding: '16px', borderRadius: '16px', border: '1px solid var(--border)', background: 'var(--bg-panel)' }}>
-                <p className="page-kicker">{question.label}</p>
-                <p style={{ fontWeight: 800, marginTop: '6px' }}>
-                  {question.options.find((option) => option.value === answers[question.id])?.label || 'Sin respuesta'}
-                </p>
-              </div>
-            ))}
-          </div>
-          <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
-            <Button variant="secondary" onClick={() => { setDone(false); setStep(0); }}>
-              <Edit size={16} /> Actualizar respuestas
-            </Button>
-            <Button onClick={() => navigate('/ruta')}>Ver plan de acción</Button>
-          </div>
-        </Card>
-      </div>
+      <PlanPreview
+        plan={plan}
+        saving={saving}
+        onEdit={() => setMode('questions')}
+        onApprove={approvePlan}
+      />
+    );
+  }
+
+  if (mode === 'summary' && plan) {
+    return (
+      <PlanPreview
+        plan={plan}
+        saving={saving}
+        onEdit={() => {
+          setMode('questions');
+          setStep(0);
+        }}
+        onApprove={() => navigate('/ruta')}
+        primaryLabel="Ver plan de acción"
+      />
     );
   }
 
@@ -128,8 +176,8 @@ export default function Diagnostic() {
     <div className="page-shell animate-fade-in">
       <PageHeader
         kicker="Diagnóstico"
-        title="Radiografía del negocio"
-        subtitle="Seis preguntas para que SOE entienda etapa, bloqueos y prioridades actuales."
+        title="Radiografía profunda del negocio"
+        subtitle="Responde con honestidad. SOE usará esto para recomendar prioridades, tareas y criterios de avance reales."
       />
 
       <Card style={{ padding: '30px' }}>
@@ -139,12 +187,14 @@ export default function Diagnostic() {
               <div className="progress-fill" style={{ width: `${progress}%` }} />
             </div>
           </div>
-          <Badge tone="info">{step + 1} / {QUESTIONS.length}</Badge>
+          <Badge tone="info">{answeredCount} / {DIAGNOSTIC_QUESTIONS.length}</Badge>
         </div>
 
-        <h2 className="display-font" style={{ fontSize: '32px', fontWeight: 600, lineHeight: 1.2, marginBottom: '22px' }}>
+        <p className="page-kicker" style={{ marginBottom: '10px' }}>Pregunta {step + 1}</p>
+        <h2 className="display-font" style={{ fontSize: '32px', fontWeight: 600, lineHeight: 1.2, marginBottom: '8px' }}>
           {current.label}
         </h2>
+        <p className="page-subtitle" style={{ marginBottom: '22px' }}>{current.helper}</p>
 
         <div style={{ display: 'grid', gap: '10px' }}>
           {current.options.map((option) => {
@@ -191,16 +241,16 @@ export default function Diagnostic() {
         </div>
 
         <div style={{ display: 'flex', justifyContent: 'space-between', gap: '12px', marginTop: '26px', flexWrap: 'wrap' }}>
-          <Button variant="secondary" onClick={() => setStep((value) => Math.max(0, value - 1))} disabled={step === 0}>
+          <Button variant="secondary" onClick={() => setStep((value) => Math.max(0, value - 1))} disabled={step === 0 || saving}>
             <ChevronLeft size={16} /> Anterior
           </Button>
-          {step < QUESTIONS.length - 1 ? (
-            <Button onClick={() => setStep((value) => value + 1)} disabled={!answers[current.id]}>
+          {step < DIAGNOSTIC_QUESTIONS.length - 1 ? (
+            <Button onClick={() => setStep((value) => value + 1)} disabled={!answers[current.id] || saving}>
               Siguiente <ChevronRight size={16} />
             </Button>
           ) : (
-            <Button onClick={handleSave} disabled={!answeredAll || saving}>
-              {saving ? 'Guardando...' : 'Finalizar diagnóstico'}
+            <Button onClick={generatePlan} disabled={!answeredAll || saving}>
+              {saving ? 'Generando plan...' : <><Sparkles size={16} /> Generar plan recomendado</>}
             </Button>
           )}
         </div>

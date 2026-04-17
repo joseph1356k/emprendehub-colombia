@@ -5,6 +5,7 @@ import {
   MOCK_OPPORTUNITIES,
   TASK_DOCUMENT_RULES,
 } from '../data/mockData';
+import { buildDeterministicPlan, normalizeRecommendedTask } from '../data/diagnostic';
 import { spanishText } from '../utils/spanishText';
 
 const AppContext = createContext(null);
@@ -76,6 +77,7 @@ export function AppProvider({ children, session }) {
   const [loading, setLoading] = useState(true);
   const [diagnosticAnswers, setDiagnosticAnswers] = useState(null);
   const [diagnosticCompleted, setDiagnosticCompleted] = useState(false);
+  const [latestDiagnosticRun, setLatestDiagnosticRun] = useState(null);
   const [tasks, setTasks] = useState([]);
   const [savedOpportunities, setSavedOpportunities] = useState([]);
   const [savedProviders, setSavedProviders] = useState([]);
@@ -84,6 +86,7 @@ export function AppProvider({ children, session }) {
   const [activityEvents, setActivityEvents] = useState([]);
   const [documents, setDocuments] = useState([]);
   const [notifications, setNotifications] = useState([]);
+  const [agentMessages, setAgentMessages] = useState([]);
   const [mutedNotificationTypes, setMutedNotificationTypes] = useState([]);
   const [toast, setToast] = useState(null);
 
@@ -91,6 +94,8 @@ export function AppProvider({ children, session }) {
   const supportsActivityEventsRef = useRef(true);
   const supportsDocumentsRef = useRef(true);
   const supportsNotificationsRef = useRef(true);
+  const supportsDiagnosticRunsRef = useRef(true);
+  const supportsAgentMessagesRef = useRef(true);
 
   const showToast = useCallback((message, type = 'success') => {
     setToast({ message, type, id: Date.now() });
@@ -124,6 +129,14 @@ export function AppProvider({ children, session }) {
       return fallback;
     }
   }, []);
+
+  const authHeaders = useCallback(
+    () => ({
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${session?.access_token || ''}`,
+    }),
+    [session?.access_token]
+  );
 
   const addActivity = useCallback(
     async (description, icon = '?') => {
@@ -304,6 +317,8 @@ export function AppProvider({ children, session }) {
           businessResult,
           documentsResult,
           notificationsResult,
+          diagnosticRunResult,
+          agentMessagesResult,
         ] = await Promise.all([
           supabase.from('entrepreneur_profiles').select('*').eq('user_id', userId).maybeSingle(),
           supabase
@@ -319,6 +334,14 @@ export function AppProvider({ children, session }) {
           supabase.from('business_profiles').select('*').eq('user_id', userId).maybeSingle(),
           supabase.from('documents').select('*').eq('user_id', userId).order('created_at', { ascending: false }),
           supabase.from('notifications').select('*').eq('user_id', userId).order('created_at', { ascending: false }).limit(80),
+          supabase
+            .from('diagnostic_runs')
+            .select('*')
+            .eq('user_id', userId)
+            .order('created_at', { ascending: false })
+            .limit(1)
+            .maybeSingle(),
+          supabase.from('agent_messages').select('*').eq('user_id', userId).order('created_at', { ascending: true }).limit(80),
         ]);
 
         const profileData = profileResult.data;
@@ -339,7 +362,7 @@ export function AppProvider({ children, session }) {
         }
 
         if (tasksData && tasksData.length > 0) {
-          setTasks(tasksData);
+          setTasks(tasksData.filter((task) => !task.archived));
         } else {
           await seedTasks(userId);
         }
@@ -370,6 +393,29 @@ export function AppProvider({ children, session }) {
               dedupe_key: item.dedupe_key || `${item.type}-${item.title}`,
             }))
           );
+        }
+
+        if (diagnosticRunResult.error && !canUseTable(diagnosticRunResult.error)) {
+          supportsDiagnosticRunsRef.current = false;
+          setLatestDiagnosticRun(readLocal(userLocalKey('latest_diagnostic_run', userId), null));
+        } else {
+          const run = diagnosticRunResult.data;
+          setLatestDiagnosticRun(
+            run
+              ? {
+                  ...run,
+                  runId: run.id,
+                  recommendedTasks: run.recommended_tasks || [],
+                }
+              : readLocal(userLocalKey('latest_diagnostic_run', userId), null)
+          );
+        }
+
+        if (agentMessagesResult.error && !canUseTable(agentMessagesResult.error)) {
+          supportsAgentMessagesRef.current = false;
+          setAgentMessages(readLocal(userLocalKey('agent_messages', userId), []));
+        } else {
+          setAgentMessages(agentMessagesResult.data || []);
         }
 
         const mutedRaw = localStorage.getItem(userLocalKey('muted_notification_types', userId));
@@ -439,10 +485,172 @@ export function AppProvider({ children, session }) {
     [addActivity, session?.user, showToast]
   );
 
-  const saveDiagnostic = useCallback(
+  const persistDiagnosticRun = useCallback(
+    async (answers, plan) => {
+      if (!session?.user || !plan) return plan;
+      if (plan.runId && !String(plan.runId).startsWith('local-')) {
+        setLatestDiagnosticRun(plan);
+        persistLocal(userLocalKey('latest_diagnostic_run', session.user.id), plan);
+        return plan;
+      }
+      const payload = {
+        user_id: session.user.id,
+        answers,
+        scores: plan.scores,
+        snapshot: plan.snapshot,
+        recommended_tasks: plan.recommendedTasks || [],
+        model: plan.model || 'client-fallback',
+      };
+
+      let nextRun = { ...plan, id: plan.runId || `local-${Date.now()}` };
+      if (supportsDiagnosticRunsRef.current) {
+        const { data, error } = await supabase.from('diagnostic_runs').insert(payload).select().single();
+        if (error && !canUseTable(error)) {
+          supportsDiagnosticRunsRef.current = false;
+        } else if (!error && data) {
+          nextRun = {
+            ...plan,
+            id: data.id,
+            runId: data.id,
+            scores: data.scores || plan.scores,
+            snapshot: data.snapshot || plan.snapshot,
+            recommendedTasks: data.recommended_tasks || plan.recommendedTasks,
+            model: data.model || plan.model,
+          };
+        }
+      }
+
+      setLatestDiagnosticRun(nextRun);
+      persistLocal(userLocalKey('latest_diagnostic_run', session.user.id), nextRun);
+      return nextRun;
+    },
+    [persistLocal, session?.user]
+  );
+
+  const requestDiagnosticPlan = useCallback(
     async (answers) => {
+      const fallback = buildDeterministicPlan(answers);
+      if (!session?.access_token) return fallback;
+
+      try {
+        const response = await fetch('/api/diagnostic-plan', {
+          method: 'POST',
+          headers: authHeaders(),
+          body: JSON.stringify({ answers }),
+        });
+
+        if (!response.ok) throw new Error(`diagnostic-plan ${response.status}`);
+        const plan = await response.json();
+        const normalized = {
+          ...fallback,
+          ...plan,
+          recommendedTasks: (plan.recommendedTasks || fallback.recommendedTasks).map((item, index) =>
+            normalizeRecommendedTask(item, index)
+          ),
+        };
+        setLatestDiagnosticRun(normalized);
+        persistLocal(userLocalKey('latest_diagnostic_run', session.user.id), normalized);
+        return normalized;
+      } catch (error) {
+        console.error('requestDiagnosticPlan fallback:', error);
+        showToast('SOE generó un plan local mientras se configura la IA.', 'warning');
+        const savedFallback = await persistDiagnosticRun(answers, fallback);
+        return savedFallback;
+      }
+    },
+    [authHeaders, persistDiagnosticRun, persistLocal, session?.access_token, session?.user, showToast]
+  );
+
+  const insertTask = useCallback(
+    async (taskInput, options = {}) => {
+      if (!session?.user) return { error: 'No session' };
+      const normalized = normalizeRecommendedTask(taskInput, options.index || 0);
+      const fullPayload = {
+        user_id: session.user.id,
+        section: normalized.section,
+        title: normalized.title,
+        status: normalized.status,
+        priority: normalized.priority,
+        due_date: normalized.dueDate,
+        rationale: normalized.rationale,
+        expected_outcome: normalized.expectedOutcome,
+        acceptance_criteria: normalized.acceptanceCriteria,
+        source: normalized.source || options.source || 'agent',
+        source_diagnostic_id: options.runId && !String(options.runId).startsWith('local-') ? options.runId : null,
+        order_index: normalized.orderIndex,
+        archived: false,
+      };
+
+      let result = await supabase.from('route_tasks').insert(fullPayload).select().single();
+      if (result.error && String(result.error.code || '') === 'PGRST204') {
+        result = await supabase
+          .from('route_tasks')
+          .insert({
+            user_id: session.user.id,
+            section: fullPayload.section,
+            title: fullPayload.title,
+            status: fullPayload.status,
+            priority: fullPayload.priority,
+          })
+          .select()
+          .single();
+      }
+
+      if (!result.error && result.data) {
+        setTasks((prev) => [...prev.filter((task) => !task.archived), result.data]);
+        if (!options.silentActivity) await addActivity(`Tarea creada: ${result.data.title}`, 'task');
+      }
+
+      return result;
+    },
+    [addActivity, session?.user]
+  );
+
+  const applyRecommendedTasks = useCallback(
+    async (plan) => {
+      if (!session?.user || !plan?.recommendedTasks?.length) return { error: null };
+      const completed = tasks.filter((task) => task.status === 'completado');
+      const now = new Date().toISOString();
+
+      let archiveResult = await supabase
+        .from('route_tasks')
+        .update({ archived: true, updated_at: now })
+        .eq('user_id', session.user.id)
+        .neq('status', 'completado');
+
+      if (archiveResult.error && String(archiveResult.error.code || '') === 'PGRST204') {
+        archiveResult = await supabase
+          .from('route_tasks')
+          .delete()
+          .eq('user_id', session.user.id)
+          .neq('status', 'completado');
+      }
+
+      if (archiveResult.error && canUseTable(archiveResult.error)) return { error: archiveResult.error };
+
+      const created = [];
+      for (const [index, item] of plan.recommendedTasks.entries()) {
+        const result = await insertTask(item, {
+          index,
+          runId: plan.runId || plan.id,
+          source: plan.model === 'deterministic-fallback' ? 'diagnostic_rules' : 'diagnostic_ai',
+          silentActivity: true,
+        });
+        if (result.data) created.push(result.data);
+      }
+
+      setTasks([...completed, ...created]);
+      await addActivity(`Plan recomendado aprobado: ${created.length} tareas nuevas`, 'diagnostic');
+      return { data: created, error: null };
+    },
+    [addActivity, insertTask, session?.user, tasks]
+  );
+
+  const saveDiagnostic = useCallback(
+    async (answers, plan = null) => {
       if (!session?.user) return { error: 'No session' };
       const stage = determineStage(answers);
+      const activePlan = plan ? await persistDiagnosticRun(answers, plan) : null;
 
       const { data, error } = await supabase
         .from('diagnostic_answers')
@@ -461,13 +669,22 @@ export function AppProvider({ children, session }) {
           .eq('user_id', session.user.id);
 
         setProfile((prev) => ({ ...prev, stage, points: newPoints }));
+
+        if (activePlan?.recommendedTasks?.length) {
+          const taskResult = await applyRecommendedTasks(activePlan);
+          if (taskResult.error) {
+            showToast('Diagnóstico guardado, pero no se pudo reemplazar el plan de tareas.', 'error');
+            return { data, error: taskResult.error };
+          }
+        }
+
         showToast('Diagnóstico guardado. Ruta personalizada lista.');
         await addActivity('Diagnóstico completado', 'diagnostic');
       }
 
       return { data, error };
     },
-    [addActivity, determineStage, profile?.points, session?.user, showToast]
+    [addActivity, applyRecommendedTasks, determineStage, persistDiagnosticRun, profile?.points, session?.user, showToast]
   );
 
   const updateTask = useCallback(
@@ -519,6 +736,122 @@ export function AppProvider({ children, session }) {
       return { data, error };
     },
     [addActivity, createNotification, profile?.points, session?.user, showToast, tasks]
+  );
+
+  const askAgent = useCallback(
+    async (message) => {
+      if (!session?.user || !message?.trim()) return null;
+      const clean = message.trim();
+      const userMessage = {
+        id: `local-user-${Date.now()}`,
+        role: 'user',
+        content: clean,
+        actions: [],
+        created_at: new Date().toISOString(),
+      };
+
+      setAgentMessages((prev) => {
+        const updated = [...prev, userMessage];
+        persistLocal(userLocalKey('agent_messages', session.user.id), updated);
+        return updated;
+      });
+
+      const fallbackTask = tasks.find((task) => task.status !== 'completado');
+      const fallbackResponse = {
+        assistantMessage: fallbackTask
+          ? `La prioridad más útil ahora es "${fallbackTask.title}". Si quieres mover el negocio hoy, abre esa tarea, define el resultado esperado y cierra un avance verificable.`
+          : 'No veo tareas pendientes. Actualiza el diagnóstico para reconstruir el plan de acción con contexto real.',
+        actions: [
+          {
+            id: fallbackTask ? `open-${fallbackTask.id}` : 'open-diagnostic',
+            type: 'open_route',
+            label: fallbackTask ? 'Abrir prioridad' : 'Actualizar diagnóstico',
+            description: fallbackTask ? `Ir a "${fallbackTask.title}".` : 'Reconstruir el plan desde el diagnóstico.',
+            payload: { route: fallbackTask ? '/ruta' : '/diagnostico', taskId: fallbackTask?.id || null },
+          },
+        ],
+      };
+
+      let result = fallbackResponse;
+      try {
+        const response = await fetch('/api/agent', {
+          method: 'POST',
+          headers: authHeaders(),
+          body: JSON.stringify({ message: clean }),
+        });
+        if (!response.ok) throw new Error(`agent ${response.status}`);
+        result = await response.json();
+      } catch (error) {
+        console.error('askAgent fallback:', error);
+        showToast('SOE respondió con contexto local mientras se configura la IA.', 'warning');
+      }
+
+      const assistantMessage = {
+        id: `local-assistant-${Date.now()}`,
+        role: 'assistant',
+        content: result.assistantMessage,
+        actions: result.actions || [],
+        created_at: new Date().toISOString(),
+      };
+
+      setAgentMessages((prev) => {
+        const updated = [...prev, assistantMessage].slice(-100);
+        persistLocal(userLocalKey('agent_messages', session.user.id), updated);
+        return updated;
+      });
+      return assistantMessage;
+    },
+    [authHeaders, persistLocal, session?.user, showToast, tasks]
+  );
+
+  const applyAgentAction = useCallback(
+    async (action, navigate) => {
+      if (!action) return { error: 'No action' };
+      const payload = action.payload || {};
+
+      if (action.type === 'open_route') {
+        navigate?.(payload.route || '/ruta', {
+          state: {
+            focusTaskId: payload.taskId || null,
+            focusOpportunityId: payload.opportunityId || null,
+            source: 'agent-action',
+          },
+        });
+        return { data: true, error: null };
+      }
+
+      if (action.type === 'open_opportunity') {
+        navigate?.('/oportunidades', { state: { focusOpportunityId: payload.opportunityId || null, source: 'agent-action' } });
+        return { data: true, error: null };
+      }
+
+      if (action.type === 'create_task') {
+        const result = await insertTask(payload.task || payload, { source: 'agent', silentActivity: false });
+        if (!result.error) showToast('Tarea creada desde SOE');
+        return result;
+      }
+
+      if (action.type === 'update_task_status' && payload.taskId && payload.status) {
+        return updateTask(payload.taskId, payload.status);
+      }
+
+      if (action.type === 'request_document') {
+        await createNotification({
+          type: 'missing_document',
+          title: 'Documento solicitado por SOE',
+          message: payload.docType
+            ? `SOE recomienda preparar: ${payload.docType}.`
+            : 'SOE recomienda preparar un documento para avanzar.',
+          dedupeKey: `agent-doc-${payload.taskId || action.id}`,
+          force: true,
+        });
+        showToast('Solicitud de documento registrada');
+        return { data: true, error: null };
+      }
+
+      return { error: 'Acción no soportada' };
+    },
+    [createNotification, insertTask, showToast, updateTask]
   );
 
   const toggleSaveOpportunity = useCallback(
@@ -774,6 +1107,7 @@ export function AppProvider({ children, session }) {
     const sectionWeights = STAGE_SECTION_WEIGHT[stage] || {};
 
     return tasks
+      .filter((task) => !task.archived)
       .map((task) => {
         const dueDays = parseDeadlineDays(task);
         const requirement = taskRequirement(task);
@@ -796,7 +1130,7 @@ export function AppProvider({ children, session }) {
             scoreBreakdown.push('+25 fecha cercana');
           } else if (dueDays <= 14) {
             score += 12;
-            scoreBreakdown.push('+12 fecha proxima');
+            scoreBreakdown.push('+12 fecha próxima');
           }
         }
 
@@ -808,7 +1142,7 @@ export function AppProvider({ children, session }) {
         const quickWin = task.priority !== 'Alta' && task.status !== 'bloqueado' && !requirement;
         if (quickWin) {
           score += QUICK_WIN_SCORE;
-          scoreBreakdown.push('+10 avance rapido');
+          scoreBreakdown.push('+10 avance rápido');
         }
 
         return {
@@ -870,8 +1204,10 @@ export function AppProvider({ children, session }) {
       blocker: mainBlocker,
       recommendedOpportunity,
       missingDocument,
+      diagnosticSnapshot: latestDiagnosticRun?.snapshot || null,
+      scores: latestDiagnosticRun?.scores || null,
     }),
-    [mainBlocker, missingDocument, pendingTasks, recommendedOpportunity]
+    [latestDiagnosticRun?.scores, latestDiagnosticRun?.snapshot, mainBlocker, missingDocument, pendingTasks, recommendedOpportunity]
   );
 
   const nextAction = useMemo(() => {
@@ -1057,9 +1393,11 @@ export function AppProvider({ children, session }) {
     loading,
     diagnosticAnswers,
     diagnosticCompleted,
+    latestDiagnosticRun,
     tasks,
     documents,
     notifications,
+    agentMessages,
     mutedNotificationTypes,
     savedOpportunities,
     savedProviders,
@@ -1084,8 +1422,12 @@ export function AppProvider({ children, session }) {
     session,
 
     updateProfile,
+    requestDiagnosticPlan,
     saveDiagnostic,
     updateTask,
+    insertTask,
+    askAgent,
+    applyAgentAction,
     toggleSaveOpportunity,
     toggleSaveProvider,
     updateCourseProgress,

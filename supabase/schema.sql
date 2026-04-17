@@ -28,6 +28,17 @@ create table if not exists diagnostic_answers (
   created_at timestamptz default now()
 );
 
+create table if not exists diagnostic_runs (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid references auth.users(id) on delete cascade not null,
+  answers jsonb not null,
+  scores jsonb not null,
+  snapshot jsonb not null,
+  recommended_tasks jsonb not null,
+  model text,
+  created_at timestamptz default now()
+);
+
 create table if not exists route_tasks (
   id uuid primary key default gen_random_uuid(),
   user_id uuid references auth.users(id) on delete cascade not null,
@@ -38,6 +49,15 @@ create table if not exists route_tasks (
   created_at timestamptz default now(),
   updated_at timestamptz default now()
 );
+
+alter table route_tasks add column if not exists due_date date;
+alter table route_tasks add column if not exists rationale text;
+alter table route_tasks add column if not exists expected_outcome text;
+alter table route_tasks add column if not exists acceptance_criteria text;
+alter table route_tasks add column if not exists source text default 'manual';
+alter table route_tasks add column if not exists source_diagnostic_id uuid;
+alter table route_tasks add column if not exists order_index integer default 0;
+alter table route_tasks add column if not exists archived boolean default false;
 
 create table if not exists saved_opportunities (
   id uuid primary key default gen_random_uuid(),
@@ -96,6 +116,15 @@ create table if not exists notifications (
   created_at timestamptz default now()
 );
 
+create table if not exists agent_messages (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid references auth.users(id) on delete cascade not null,
+  role text not null check (role in ('user', 'assistant')),
+  content text not null,
+  actions jsonb default '[]'::jsonb,
+  created_at timestamptz default now()
+);
+
 create table if not exists business_profiles (
   id uuid primary key default gen_random_uuid(),
   user_id uuid references auth.users(id) on delete cascade unique not null,
@@ -118,6 +147,7 @@ create table if not exists business_profiles (
 
 alter table entrepreneur_profiles enable row level security;
 alter table diagnostic_answers enable row level security;
+alter table diagnostic_runs enable row level security;
 alter table route_tasks enable row level security;
 alter table saved_opportunities enable row level security;
 alter table saved_providers enable row level security;
@@ -125,6 +155,7 @@ alter table course_progress enable row level security;
 alter table documents enable row level security;
 alter table activity_events enable row level security;
 alter table notifications enable row level security;
+alter table agent_messages enable row level security;
 alter table business_profiles enable row level security;
 
 drop policy if exists "Users own their profile" on entrepreneur_profiles;
@@ -134,6 +165,11 @@ create policy "Users own their profile" on entrepreneur_profiles
 
 drop policy if exists "Users own their diagnostic" on diagnostic_answers;
 create policy "Users own their diagnostic" on diagnostic_answers
+  for all using (auth.uid() = user_id)
+  with check (auth.uid() = user_id);
+
+drop policy if exists "Users own their diagnostic runs" on diagnostic_runs;
+create policy "Users own their diagnostic runs" on diagnostic_runs
   for all using (auth.uid() = user_id)
   with check (auth.uid() = user_id);
 
@@ -169,6 +205,11 @@ create policy "Users own their activity events" on activity_events
 
 drop policy if exists "Users own their notifications" on notifications;
 create policy "Users own their notifications" on notifications
+  for all using (auth.uid() = user_id)
+  with check (auth.uid() = user_id);
+
+drop policy if exists "Users own their agent messages" on agent_messages;
+create policy "Users own their agent messages" on agent_messages
   for all using (auth.uid() = user_id)
   with check (auth.uid() = user_id);
 

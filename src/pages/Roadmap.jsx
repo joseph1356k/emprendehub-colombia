@@ -62,6 +62,9 @@ function TaskDetailModal({ task, onClose }) {
             <Badge tone={STATUS_TONE[task.status] || 'neutral'}>{STATUS_LABEL[task.status] || task.status}</Badge>
             <h2 className="page-title" style={{ fontSize: '30px', marginTop: '12px' }}>{spanishText(task.title)}</h2>
             <p style={{ color: 'var(--text-secondary)', marginTop: '6px' }}>{spanishText(task.section)} · Prioridad {task.priority}</p>
+            {task.rationale ? (
+              <p style={{ color: 'var(--text-secondary)', marginTop: '10px' }}>{task.rationale}</p>
+            ) : null}
           </div>
           <button className="btn-ghost" onClick={onClose} aria-label="Cerrar detalle">
             <X size={18} />
@@ -77,6 +80,15 @@ function TaskDetailModal({ task, onClose }) {
             </div>
           </div>
         ) : null}
+
+        <Card style={{ padding: '16px', background: 'var(--bg-panel)', marginBottom: '16px', boxShadow: 'none' }}>
+          <p className="page-kicker" style={{ marginBottom: '10px' }}>Criterio de avance</p>
+          <p style={{ fontWeight: 800 }}>{task.expected_outcome || 'Avance concreto y verificable'}</p>
+          <p style={{ color: 'var(--text-secondary)', fontSize: '14px', margin: '4px 0 14px' }}>
+            {task.acceptance_criteria || 'La tarea queda cerrada cuando existe evidencia del resultado.'}
+          </p>
+          {task.due_date ? <Badge tone="info">Fecha sugerida: {task.due_date}</Badge> : null}
+        </Card>
 
         <Card style={{ padding: '16px', background: 'var(--bg-panel)', marginBottom: '16px', boxShadow: 'none' }}>
           <p className="page-kicker" style={{ marginBottom: '10px' }}>Documento asociado</p>
@@ -146,7 +158,12 @@ function TaskItem({ task, onToggle, onOpen, busy }) {
       </button>
       <button onClick={() => onOpen(task)} style={{ textAlign: 'left', minWidth: 0 }}>
         <p style={{ fontWeight: 800, color: done ? 'var(--text-tertiary)' : 'var(--text-primary)' }}>{spanishText(task.title)}</p>
-        <p style={{ color: 'var(--text-secondary)', fontSize: '13px' }}>{spanishText(task.section)} · Prioridad {task.priority}</p>
+        <p style={{ color: 'var(--text-secondary)', fontSize: '13px' }}>
+          {spanishText(task.section)} · Prioridad {task.priority}{task.due_date ? ` · ${task.due_date}` : ''}
+        </p>
+        {task.rationale ? (
+          <p style={{ color: 'var(--text-secondary)', fontSize: '13px', marginTop: '4px' }}>{task.rationale}</p>
+        ) : null}
       </button>
       <Badge tone={STATUS_TONE[task.status] || 'neutral'}>{STATUS_LABEL[task.status] || task.status}</Badge>
     </div>

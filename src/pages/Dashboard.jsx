@@ -9,7 +9,7 @@ import { spanishText } from '../utils/spanishText';
 const BUSINESS_AREAS = [
   { label: 'Ventas', sections: ['Mercadeo'], fallback: 3 },
   { label: 'Finanzas', sections: ['Financiero'], fallback: 5 },
-  { label: 'Operaciones', sections: ['Formalizacion'], fallback: 7 },
+  { label: 'Operaciones', sections: ['Formalización', 'Formalizacion', 'Operaciones'], fallback: 7 },
   { label: 'Marketing', sections: ['Mercadeo'], fallback: 2 },
   { label: 'Producto', sections: ['Producto / Servicio'], fallback: 8 },
 ];
@@ -52,6 +52,9 @@ export default function Dashboard() {
   const name = profile?.full_name?.split(' ')[0] || 'Carlos';
   const pendingTasks = tasks.filter((task) => task.status !== 'completado');
   const weeklyTasks = todayPlan.topTasks.length > 0 ? todayPlan.topTasks : pendingTasks.slice(0, 4);
+  const diagnosticSnapshot = todayPlan.diagnosticSnapshot;
+  const scores = todayPlan.scores || {};
+  const weakestScore = Object.entries(scores).sort((a, b) => a[1] - b[1])[0];
 
   const health = useMemo(() => {
     return BUSINESS_AREAS.map((area) => {
@@ -95,6 +98,34 @@ export default function Dashboard() {
               <p style={{ color: 'var(--text-secondary)', marginTop: '4px' }}>Activa recomendaciones y prioridades según tu etapa real.</p>
             </div>
             <Button variant="secondary" onClick={() => navigate('/diagnostico')}>Completar diagnóstico</Button>
+          </div>
+        </Card>
+      ) : null}
+
+      {diagnosticCompleted && diagnosticSnapshot ? (
+        <Card style={{ marginBottom: '24px', padding: '24px' }}>
+          <div className="section-grid-2" style={{ alignItems: 'center' }}>
+            <div>
+              <p className="page-kicker">Diagnóstico base</p>
+              <h2 className="page-title" style={{ fontSize: '32px', marginTop: '8px' }}>
+                {diagnosticSnapshot.monthlyPriority}
+              </h2>
+              <p className="page-subtitle" style={{ marginTop: '8px' }}>
+                {diagnosticSnapshot.agentRecommendation}
+              </p>
+            </div>
+            <div style={{ display: 'grid', gap: '10px' }}>
+              <div style={{ padding: '14px', borderRadius: '16px', border: '1px solid var(--border)', background: 'var(--bg-panel)' }}>
+                <p style={{ fontWeight: 800 }}>Área más débil</p>
+                <p style={{ color: 'var(--primary)', fontWeight: 800, marginTop: '4px' }}>
+                  {weakestScore ? `${weakestScore[0]} · ${weakestScore[1]}/10` : 'Foco'}
+                </p>
+              </div>
+              <div style={{ padding: '14px', borderRadius: '16px', border: '1px solid var(--border)', background: '#fffaf0' }}>
+                <p style={{ fontWeight: 800, color: '#8a6730' }}>Riesgo actual</p>
+                <p style={{ color: '#8a6730', marginTop: '4px' }}>{diagnosticSnapshot.currentRisk}</p>
+              </div>
+            </div>
           </div>
         </Card>
       ) : null}
@@ -164,7 +195,7 @@ export default function Dashboard() {
                   <span>
                     <span style={{ display: 'block', fontWeight: 800 }}>{spanishText(task.title)}</span>
                     <span style={{ display: 'block', color: 'var(--text-secondary)', fontSize: '13px' }}>
-                      {task.scoreBreakdown?.length ? task.scoreBreakdown.join(' / ') : `${task.priority} prioridad`}
+                      {task.rationale || (task.scoreBreakdown?.length ? task.scoreBreakdown.join(' / ') : `${task.priority} prioridad`)}
                     </span>
                   </span>
                   <Badge tone={task.status === 'bloqueado' ? 'warning' : task.documentStatus === 'Pendiente' ? 'info' : 'neutral'}>
