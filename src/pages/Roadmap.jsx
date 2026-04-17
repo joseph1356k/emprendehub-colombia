@@ -3,6 +3,7 @@ import { useLocation } from 'react-router-dom';
 import { Check, FileText, Lock, Upload, Wand2, X } from 'lucide-react';
 import { Badge, Button, Card, EmptyState, PageHeader } from '../components/ui';
 import { useApp } from '../context/AppContext';
+import { spanishText } from '../utils/spanishText';
 
 const STATUS_TONE = {
   completado: 'success',
@@ -34,7 +35,7 @@ function TaskDetailModal({ task, onClose }) {
   const unblockText =
     docState.required && docState.status !== 'Subido'
       ? `Para desbloquearla, registra el ${docState.requirement.docType} o genera una plantilla para empezar.`
-      : 'Para desbloquearla, cambia el estado a en progreso y define la siguiente accion concreta.';
+      : 'Para desbloquearla, cambia el estado a en progreso y define la siguiente acción concreta.';
 
   const run = async (fn) => {
     setWorking(true);
@@ -59,8 +60,8 @@ function TaskDetailModal({ task, onClose }) {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '12px', marginBottom: '18px' }}>
           <div>
             <Badge tone={STATUS_TONE[task.status] || 'neutral'}>{STATUS_LABEL[task.status] || task.status}</Badge>
-            <h2 className="page-title" style={{ fontSize: '30px', marginTop: '12px' }}>{task.title}</h2>
-            <p style={{ color: 'var(--text-secondary)', marginTop: '6px' }}>{task.section} · Prioridad {task.priority}</p>
+            <h2 className="page-title" style={{ fontSize: '30px', marginTop: '12px' }}>{spanishText(task.title)}</h2>
+            <p style={{ color: 'var(--text-secondary)', marginTop: '6px' }}>{spanishText(task.section)} · Prioridad {task.priority}</p>
           </div>
           <button className="btn-ghost" onClick={onClose} aria-label="Cerrar detalle">
             <X size={18} />
@@ -71,7 +72,7 @@ function TaskDetailModal({ task, onClose }) {
           <div style={{ display: 'flex', gap: '10px', padding: '14px', borderRadius: '16px', border: '1px solid #efd8a7', background: '#fffaf0', marginBottom: '16px' }}>
             <Lock size={18} style={{ color: '#8a6730', flexShrink: 0 }} />
             <div>
-              <p style={{ color: '#8a6730', fontSize: '14px', fontWeight: 800 }}>Esta tarea esta bloqueada.</p>
+              <p style={{ color: '#8a6730', fontSize: '14px', fontWeight: 800 }}>Esta tarea está bloqueada.</p>
               <p style={{ color: '#8a6730', fontSize: '14px', marginTop: '4px' }}>{unblockText}</p>
             </div>
           </div>
@@ -144,8 +145,8 @@ function TaskItem({ task, onToggle, onOpen, busy }) {
         {done ? <Check size={14} /> : null}
       </button>
       <button onClick={() => onOpen(task)} style={{ textAlign: 'left', minWidth: 0 }}>
-        <p style={{ fontWeight: 800, color: done ? 'var(--text-tertiary)' : 'var(--text-primary)' }}>{task.title}</p>
-        <p style={{ color: 'var(--text-secondary)', fontSize: '13px' }}>{task.section} · Prioridad {task.priority}</p>
+        <p style={{ fontWeight: 800, color: done ? 'var(--text-tertiary)' : 'var(--text-primary)' }}>{spanishText(task.title)}</p>
+        <p style={{ color: 'var(--text-secondary)', fontSize: '13px' }}>{spanishText(task.section)} · Prioridad {task.priority}</p>
       </button>
       <Badge tone={STATUS_TONE[task.status] || 'neutral'}>{STATUS_LABEL[task.status] || task.status}</Badge>
     </div>
@@ -180,7 +181,7 @@ export default function Roadmap() {
   return (
     <div className="page-shell animate-fade-in">
       <PageHeader
-        kicker="Plan de accion"
+        kicker="Plan de acción"
         title="Mis tareas"
         subtitle={`Etapa actual: ${profile?.stage || 'Idea'}. Semana del ciclo activo con prioridades, documentos y estados.`}
       />
@@ -197,7 +198,7 @@ export default function Roadmap() {
 
       {tasks.length === 0 ? (
         <Card>
-          <EmptyState title="Aun no hay tareas" description="Cuando completes el diagnostico, Soe generara tu plan de accion." />
+          <EmptyState title="Aún no hay tareas" description="Cuando completes el diagnóstico, SOE generará tu plan de acción." />
         </Card>
       ) : (
         <div style={{ display: 'grid', gap: '18px' }}>
@@ -207,7 +208,7 @@ export default function Roadmap() {
               <Card key={section} style={{ padding: '22px 24px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', gap: '14px', alignItems: 'center', marginBottom: '4px' }}>
                   <div>
-                    <p className="page-kicker">{section}</p>
+                    <p className="page-kicker">{spanishText(section)}</p>
                     <h2 style={{ fontSize: '20px', fontWeight: 800, marginTop: '5px' }}>{done}/{sectionTasks.length} completadas</h2>
                   </div>
                   <Badge tone={done === sectionTasks.length ? 'success' : 'info'}>{Math.round((done / sectionTasks.length) * 100)}%</Badge>

@@ -3,6 +3,7 @@ import { Bell, Bookmark, Lock, Save, User } from 'lucide-react';
 import { Badge, Button, Card, EmptyState, Input, Label, PageHeader } from '../components/ui';
 import { useApp } from '../context/AppContext';
 import { supabase } from '../lib/supabase';
+import { spanishText } from '../utils/spanishText';
 
 const SECTIONS = [
   { id: 'info', label: 'Datos', icon: <User size={16} /> },
@@ -37,7 +38,7 @@ export default function Profile() {
 
   const handlePasswordUpdate = async () => {
     if (!session?.user?.email) {
-      showToast('No hay una sesion activa para actualizar seguridad.', 'error');
+      showToast('No hay una sesión activa para actualizar seguridad.', 'error');
       return;
     }
     if (!pwForm.current || !pwForm.nueva || !pwForm.confirmar) {
@@ -45,7 +46,7 @@ export default function Profile() {
       return;
     }
     if (pwForm.nueva.length < 6) {
-      showToast('La nueva contrasena debe tener minimo 6 caracteres.', 'error');
+      showToast('La nueva contraseña debe tener mínimo 6 caracteres.', 'error');
       return;
     }
     if (pwForm.nueva !== pwForm.confirmar) {
@@ -58,18 +59,18 @@ export default function Profile() {
       password: pwForm.current,
     });
     if (signInError) {
-      showToast('La contrasena actual no coincide.', 'error');
+      showToast('La contraseña actual no coincide.', 'error');
       return;
     }
 
     const { error } = await supabase.auth.updateUser({ password: pwForm.nueva });
     if (error) {
-      showToast(error.message || 'No se pudo actualizar la contrasena.', 'error');
+      showToast(error.message || 'No se pudo actualizar la contraseña.', 'error');
       return;
     }
 
     setPwForm({ current: '', nueva: '', confirmar: '' });
-    showToast('Contrasena actualizada');
+    showToast('Contraseña actualizada');
   };
 
   const renderInfo = () => (
@@ -87,8 +88,8 @@ export default function Profile() {
         {[
           ['Nombre completo', 'full_name', 'Tu nombre'],
           ['Ciudad', 'city', 'Ciudad base'],
-          ['Telefono', 'phone', '+57 300 000 0000'],
-          ['Sector', 'sector', 'Tecnologia, servicios, comercio...'],
+          ['Teléfono', 'phone', '+57 300 000 0000'],
+          ['Sector', 'sector', 'Tecnología, servicios, comercio...'],
         ].map(([label, key, placeholder]) => (
           <div key={key}>
             <Label>{label}</Label>
@@ -110,7 +111,7 @@ export default function Profile() {
       <p className="page-kicker">Alertas</p>
       <h2 style={{ fontSize: '22px', fontWeight: 800, margin: '5px 0 18px' }}>Preferencias de seguimiento</h2>
       {[
-        { key: 'oportunidades', label: 'Oportunidades compatibles', desc: 'Convocatorias y opciones segun etapa.' },
+        { key: 'oportunidades', label: 'Oportunidades compatibles', desc: 'Convocatorias y opciones según etapa.' },
         { key: 'cursos', label: 'Biblioteca y recursos', desc: 'Contenido que complementa el plan.' },
         { key: 'tareas', label: 'Tareas criticas', desc: 'Avisos sobre bloqueos y vencimientos.' },
         { key: 'reporte', label: 'Resumen de ciclo', desc: 'Lectura de avance para revisar prioridades.' },
@@ -141,12 +142,12 @@ export default function Profile() {
   const renderPassword = () => (
     <Card>
       <p className="page-kicker">Seguridad</p>
-      <h2 style={{ fontSize: '22px', fontWeight: 800, margin: '5px 0 18px' }}>Cambiar contrasena</h2>
+      <h2 style={{ fontSize: '22px', fontWeight: 800, margin: '5px 0 18px' }}>Cambiar contraseña</h2>
       <div style={{ maxWidth: '440px', display: 'grid', gap: '14px' }}>
         {[
-          ['Contrasena actual', 'current'],
-          ['Nueva contrasena', 'nueva'],
-          ['Confirmar contrasena', 'confirmar'],
+          ['Contraseña actual', 'current'],
+          ['Nueva contraseña', 'nueva'],
+          ['Confirmar contraseña', 'confirmar'],
         ].map(([label, key]) => (
           <div key={key}>
             <Label>{label}</Label>
@@ -154,7 +155,7 @@ export default function Profile() {
           </div>
         ))}
         <Button type="button" onClick={handlePasswordUpdate} style={{ justifySelf: 'start' }}>
-          Actualizar contrasena
+          Actualizar contraseña
         </Button>
       </div>
     </Card>
@@ -186,7 +187,7 @@ export default function Profile() {
       <PageHeader
         kicker="Cuenta"
         title="Mi perfil"
-        subtitle={`${profile?.stage || 'Idea'} · ${profile?.sector || 'Sector sin definir'}`}
+        subtitle={`${spanishText(profile?.stage || 'Idea')} · ${profile?.sector || 'Sector sin definir'}`}
       />
 
       <div className="profile-grid">
@@ -195,7 +196,7 @@ export default function Profile() {
             <div className="avatar" style={{ width: '52px', height: '52px' }}>{initial}</div>
             <div>
               <p style={{ fontWeight: 800 }}>{displayName}</p>
-              <p style={{ color: 'var(--text-secondary)', fontSize: '13px' }}>Cuenta Soe</p>
+              <p style={{ color: 'var(--text-secondary)', fontSize: '13px' }}>Cuenta SOE</p>
             </div>
           </div>
           <div style={{ display: 'grid', gap: '4px' }}>

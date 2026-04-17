@@ -4,6 +4,7 @@ import { Bookmark, BookmarkCheck, ExternalLink, Search, X } from 'lucide-react';
 import { Badge, Button, Card, EmptyState, Input, PageHeader } from '../components/ui';
 import { useApp } from '../context/AppContext';
 import { MOCK_OPPORTUNITIES, STAGES } from '../data/mockData';
+import { spanishText } from '../utils/spanishText';
 
 export default function Opportunities() {
   const { savedOpportunities, toggleSaveOpportunity, profile, showToast } = useApp();
@@ -36,7 +37,7 @@ export default function Opportunities() {
   return (
     <div className="page-shell animate-fade-in">
       <PageHeader
-        kicker="Soe"
+        kicker="SOE"
         title="Oportunidades"
         subtitle="Seleccionadas para tu negocio este mes, con foco en etapa, cierre y utilidad real."
       />
@@ -49,11 +50,11 @@ export default function Opportunities() {
           </div>
           <select className="form-input" value={stageFilter} onChange={(event) => setStageFilter(event.target.value)} style={{ width: 'auto', minWidth: '160px' }}>
             <option value="Todos">Todas las etapas</option>
-            {STAGES.map((stage) => <option key={stage} value={stage}>{stage}</option>)}
+            {STAGES.map((stage) => <option key={stage} value={stage}>{spanishText(stage)}</option>)}
           </select>
           <select className="form-input" value={typeFilter} onChange={(event) => setTypeFilter(event.target.value)} style={{ width: 'auto', minWidth: '160px' }}>
             <option value="Todos">Todos los tipos</option>
-            {['Financiacion', 'Aceleracion', 'Credito', 'Beca', 'Red experta'].map((type) => <option key={type} value={type}>{type}</option>)}
+            {['Financiación', 'Aceleración', 'Crédito', 'Beca', 'Red experta'].map((type) => <option key={type} value={type}>{type}</option>)}
           </select>
           {(search || stageFilter !== 'Todos' || typeFilter !== 'Todos') ? (
             <Button variant="secondary" onClick={() => { setSearch(''); setStageFilter('Todos'); setTypeFilter('Todos'); }}>
@@ -82,7 +83,7 @@ export default function Opportunities() {
       <Card style={{ padding: '22px 26px' }}>
         <p className="page-kicker" style={{ marginBottom: '14px' }}>Activas ahora</p>
         {filtered.length === 0 ? (
-          <EmptyState title="Sin resultados" description="Ajusta los filtros o revisa de nuevo en el proximo ciclo." />
+          <EmptyState title="Sin resultados" description="Ajusta los filtros o revisa de nuevo en el próximo ciclo." />
         ) : (
           <div style={{ display: 'grid', gap: 0 }}>
             {filtered.map((opp) => {

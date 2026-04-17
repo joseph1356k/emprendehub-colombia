@@ -7,64 +7,64 @@ import { useApp } from '../context/AppContext';
 const QUESTIONS = [
   {
     id: 'etapa',
-    label: 'En que etapa se encuentra tu negocio?',
+    label: '¿En qué etapa se encuentra tu negocio?',
     options: [
       { value: 'idea', label: 'Tengo una idea', desc: 'Estoy explorando y definiendo el concepto.' },
       { value: 'validando', label: 'Estoy validando', desc: 'Tengo prototipo o primeras conversaciones con clientes.' },
       { value: 'vendiendo', label: 'Ya genero ingresos', desc: 'Tengo clientes que pagan con cierta recurrencia.' },
-      { value: 'creciendo', label: 'Estoy creciendo', desc: 'Tengo equipo y necesito ordenar operaciones.' },
+      { value: 'creciendo', label: 'Estoy creciendo', desc: 'Tengo equipo y necesito ordenar operaciónes.' },
       { value: 'escalando', label: 'Estoy escalando', desc: 'Busco nuevos mercados, capital o estructura directiva.' },
     ],
   },
   {
     id: 'formalizacion',
-    label: 'Que tan formalizado esta tu negocio?',
+    label: '¿Qué tan formalizado está tu negocio?',
     options: [
-      { value: 'ninguna', label: 'Sin formalizacion', desc: 'Aun no tengo RUT ni matricula mercantil.' },
-      { value: 'en-proceso', label: 'En proceso', desc: 'Estoy iniciando tramites.' },
-      { value: 'parcial', label: 'Parcialmente formal', desc: 'Algunos requisitos ya estan listos.' },
-      { value: 'completa', label: 'Completamente formal', desc: 'RUT, camara y documentos principales al dia.' },
+      { value: 'ninguna', label: 'Sin formalizacion', desc: 'Aún no tengo RUT ni matrícula mercantil.' },
+      { value: 'en-proceso', label: 'En proceso', desc: 'Estoy iniciando trámites.' },
+      { value: 'parcial', label: 'Parcialmente formal', desc: 'Algunos requisitos ya están listos.' },
+      { value: 'completa', label: 'Completamente formal', desc: 'RUT, cámara y documentos principales al día.' },
     ],
   },
   {
     id: 'necesidad',
-    label: 'Cual es la decision mas importante ahora?',
+    label: '¿Cuál es la decisión más importante ahora?',
     options: [
       { value: 'capital', label: 'Capital o caja', desc: 'Necesito financiar crecimiento o estabilizar flujo.' },
       { value: 'validacion', label: 'Producto y validacion', desc: 'Debo confirmar si la oferta funciona.' },
-      { value: 'clientes', label: 'Clientes y ventas', desc: 'Necesito mejorar adquisicion y conversion.' },
+      { value: 'clientes', label: 'Clientes y ventas', desc: 'Necesito mejorar adquisición y conversión.' },
       { value: 'equipo', label: 'Equipo y roles', desc: 'Debo decidir que contratar o tercerizar.' },
-      { value: 'direccion', label: 'Direccion y criterio externo', desc: 'Necesito claridad para decidir con menos ruido.' },
+      { value: 'direccion', label: 'Dirección y criterio externo', desc: 'Necesito claridad para decidir con menos ruido.' },
     ],
   },
   {
     id: 'equipo',
-    label: 'Como esta armado tu equipo?',
+    label: '¿Cómo está armado tu equipo?',
     options: [
       { value: 'solo', label: 'Solo por ahora', desc: 'Soy fundador individual.' },
-      { value: 'cofounders', label: 'Equipo fundador pequeno', desc: 'Tengo 1 o 2 socios activos.' },
-      { value: 'pequeno', label: 'Equipo operativo pequeno', desc: 'Trabajamos entre 3 y 5 personas.' },
-      { value: 'mediano', label: 'Equipo establecido', desc: 'Mas de 5 personas sostienen la operacion.' },
+      { value: 'cofounders', label: 'Equipo fundador pequeño', desc: 'Tengo 1 o 2 socios activos.' },
+      { value: 'pequeño', label: 'Equipo operativo pequeño', desc: 'Trabajamos entre 3 y 5 personas.' },
+      { value: 'mediano', label: 'Equipo establecido', desc: 'Más de 5 personas sostienen la operación.' },
     ],
   },
   {
     id: 'ingresos',
-    label: 'Cuanto genera actualmente?',
+    label: '¿Cuánto genera actualmente?',
     options: [
-      { value: 'cero', label: 'Aun no genera ingresos', desc: 'Estoy antes de ventas recurrentes.' },
+      { value: 'cero', label: 'Aún no genera ingresos', desc: 'Estoy antes de ventas recurrentes.' },
       { value: 'bajo', label: 'Hasta $5M COP/mes', desc: 'Primeras ventas.' },
       { value: 'medio', label: '$5M - $20M COP/mes', desc: 'Traccion inicial.' },
-      { value: 'alto', label: 'Mas de $20M COP/mes', desc: 'Traccion comprobada.' },
+      { value: 'alto', label: 'Más de $20M COP/mes', desc: 'Traccion comprobada.' },
     ],
   },
   {
     id: 'recursos',
-    label: 'Que recurso destrabaria mas avance?',
+    label: '¿Qué recurso destrabaría más avance?',
     options: [
-      { value: 'herramientas', label: 'Herramientas y plantillas', desc: 'Necesito bajar ideas a ejecucion.' },
+      { value: 'herramientas', label: 'Herramientas y plantillas', desc: 'Necesito bajar ideas a ejecución.' },
       { value: 'red', label: 'Red y alianzas', desc: 'Necesito abrir conversaciones correctas.' },
-      { value: 'financiacion', label: 'Financiacion', desc: 'Necesito oportunidades de capital o credito.' },
-      { value: 'formacion', label: 'Aprendizaje practico', desc: 'Necesito fortalecer habilidades concretas.' },
+      { value: 'financiacion', label: 'Financiación', desc: 'Necesito oportunidades de capital o crédito.' },
+      { value: 'formacion', label: 'Aprendizaje práctico', desc: 'Necesito fortalecer habilidades concretas.' },
     ],
   },
 ];
@@ -98,10 +98,10 @@ export default function Diagnostic() {
     return (
       <div className="page-shell animate-fade-in">
         <Card style={{ padding: '42px', textAlign: 'center' }}>
-          <Badge tone="mint">Diagnostico completado</Badge>
+          <Badge tone="mint">Diagnóstico completado</Badge>
           <h1 className="page-title" style={{ marginTop: '14px' }}>Tu etapa base es {stage}</h1>
           <p className="page-subtitle" style={{ margin: '14px auto 28px' }}>
-            Soe actualizo el contexto para priorizar tareas, oportunidades y seguimiento del mes.
+            SOE actualizó el contexto para priorizar tareas, oportunidades y seguimiento del mes.
           </p>
           <div className="section-grid-2" style={{ marginBottom: '28px', textAlign: 'left' }}>
             {QUESTIONS.map((question) => (
@@ -117,7 +117,7 @@ export default function Diagnostic() {
             <Button variant="secondary" onClick={() => { setDone(false); setStep(0); }}>
               <Edit size={16} /> Actualizar respuestas
             </Button>
-            <Button onClick={() => navigate('/ruta')}>Ver plan de accion</Button>
+            <Button onClick={() => navigate('/ruta')}>Ver plan de acción</Button>
           </div>
         </Card>
       </div>
@@ -127,9 +127,9 @@ export default function Diagnostic() {
   return (
     <div className="page-shell animate-fade-in">
       <PageHeader
-        kicker="Diagnostico"
-        title="Radiografia del negocio"
-        subtitle="Seis preguntas para que Soe entienda etapa, bloqueos y prioridades actuales."
+        kicker="Diagnóstico"
+        title="Radiografía del negocio"
+        subtitle="Seis preguntas para que SOE entienda etapa, bloqueos y prioridades actuales."
       />
 
       <Card style={{ padding: '30px' }}>
@@ -200,7 +200,7 @@ export default function Diagnostic() {
             </Button>
           ) : (
             <Button onClick={handleSave} disabled={!answeredAll || saving}>
-              {saving ? 'Guardando...' : 'Finalizar diagnostico'}
+              {saving ? 'Guardando...' : 'Finalizar diagnóstico'}
             </Button>
           )}
         </div>

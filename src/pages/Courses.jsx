@@ -158,7 +158,7 @@ export default function Courses() {
             <p style={{ color: 'var(--text-secondary)', lineHeight: 1.8, marginBottom: '20px' }}>{selectedCourse.description}</p>
             <div className="section-grid-2" style={{ marginBottom: '22px' }}>
               {[
-                ['Duracion', selectedCourse.duration],
+                ['Duración', selectedCourse.duration],
                 ['Lecciones', `${selectedCourse.lessons}`],
                 ['Nivel', selectedCourse.level],
                 ['Progreso', `${selectedCourse.progress}%`],

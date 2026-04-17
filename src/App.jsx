@@ -120,7 +120,7 @@ function LoadingScreen() {
       }}
     >
       <div style={{ textAlign: 'center' }}>
-        <p className="brand-name" style={{ marginBottom: '14px' }}>Soe</p>
+        <p className="brand-name" style={{ marginBottom: '14px' }}>SOE</p>
         <div
           aria-label="Cargando"
           style={{

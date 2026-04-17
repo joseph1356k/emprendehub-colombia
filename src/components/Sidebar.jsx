@@ -15,6 +15,7 @@ import {
   X,
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
+import { spanishText } from '../utils/spanishText';
 
 const GROUPS = [
   {
@@ -26,10 +27,10 @@ const GROUPS = [
     ],
   },
   {
-    title: 'Soe',
+    title: 'SOE',
     items: [
       { to: '/mi-agente', icon: <MessageCircle size={17} />, label: 'Mi agente' },
-      { to: '/diagnostico', icon: <FileText size={17} />, label: 'Diagnostico' },
+      { to: '/diagnostico', icon: <FileText size={17} />, label: 'Diagnóstico' },
       { to: '/oportunidades', icon: <Search size={17} />, label: 'Oportunidades' },
     ],
   },
@@ -63,10 +64,10 @@ export default function Sidebar({ isOpen, onClose }) {
           aria-label="Ir al dashboard"
           style={{ textAlign: 'left' }}
         >
-          <span className="brand-name">Soe</span>
+          <span className="brand-name">SOE</span>
           <span className="brand-caption">sistema operativo emprendedor</span>
         </button>
-        <button className="btn-ghost mobile-menu-button" onClick={onClose} aria-label="Cerrar menu">
+        <button className="btn-ghost mobile-menu-button" onClick={onClose} aria-label="Cerrar menú">
           <X size={18} />
         </button>
       </div>
@@ -100,7 +101,7 @@ export default function Sidebar({ isOpen, onClose }) {
               <p style={{ fontSize: '14px', fontWeight: 800, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                 {displayName}
               </p>
-              <p style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>{stage} · {level}</p>
+              <p style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>{spanishText(stage)} · {level}</p>
             </div>
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '7px' }}>

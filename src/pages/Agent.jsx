@@ -3,11 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import { Send, SquareCheckBig } from 'lucide-react';
 import { Badge, Button, Card } from '../components/ui';
 import { useApp } from '../context/AppContext';
+import { spanishText } from '../utils/spanishText';
 
 const QUICK_REPLIES = [
   'Ver mis tareas pendientes',
-  'No se a quien contactar',
-  'Como escribo el mensaje',
+  'No sé a quién contactar',
+  'Cómo escribo el mensaje',
 ];
 
 function Bubble({ role, children, time }) {
@@ -52,16 +53,16 @@ export default function Agent() {
 
   const firstName = profile?.full_name?.split(' ')[0] || 'Carlos';
   const pendingCount = todayPlan.topTasks.length;
-  const urgentTask = todayPlan.topTasks[0]?.title || 'definir la siguiente prioridad';
+  const urgentTask = spanishText(todayPlan.topTasks[0]?.title) || 'definir la siguiente prioridad';
   const recommendedOpportunity = todayPlan.recommendedOpportunity;
 
   const initialMessage = useMemo(
     () => (
       <>
-        Hola {firstName}, buenos dias. Tienes <strong>{pendingCount || 'varias'} tareas pendientes</strong> esta semana.
-        La mas urgente es <strong>{urgentTask}</strong>.
+        Hola {firstName}, buenos días. Tienes <strong>{pendingCount || 'varias'} tareas pendientes</strong> esta semana.
+        La más urgente es <strong>{urgentTask}</strong>.
         <br /><br />
-        Arrancamos con eso o hay algo mas urgente hoy?
+        Arrancamos con eso o hay algo más urgente hoy?
       </>
     ),
     [firstName, pendingCount, urgentTask]
@@ -78,8 +79,8 @@ export default function Agent() {
         role: 'assistant',
         text:
           clean === 'Ver mis tareas pendientes'
-            ? 'Abro tu plan de accion para que revises prioridades, fechas y bloqueos.'
-            : 'Perfecto. Antes de darte una estrategia, necesito precisar el contexto: quienes son las personas o clientes que quieres mover esta semana?',
+            ? 'Abro tu plan de acción para que revises prioridades, fechas y bloqueos.'
+            : 'Perfecto. Antes de darte una estrategia, necesito precisar el contexto: quiénes son las personas o clientes que quieres mover esta semana?',
       },
     ]);
     setDraft('');
@@ -95,7 +96,7 @@ export default function Agent() {
               <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
                 <div className="avatar" style={{ width: '52px', height: '52px', background: 'var(--primary)', color: '#fff' }}>S</div>
                 <div>
-                  <h1 style={{ fontSize: '22px', fontWeight: 800 }}>Soe - tu agente</h1>
+                  <h1 style={{ fontSize: '22px', fontWeight: 800 }}>SOE - tu agente</h1>
                   <p style={{ color: 'var(--status-success)', fontSize: '14px', fontWeight: 700 }}>En linea ahora</p>
                 </div>
               </div>
@@ -132,8 +133,8 @@ export default function Agent() {
                   className="form-input"
                   value={draft}
                   onChange={(event) => setDraft(event.target.value)}
-                  placeholder="Escribele a Soe..."
-                  aria-label="Mensaje para Soe"
+                  placeholder="Escríbele a SOE..."
+                  aria-label="Mensaje para SOE"
                 />
                 <Button type="submit" aria-label="Enviar mensaje" style={{ width: '52px', padding: 0 }}>
                   <Send size={17} />
@@ -157,7 +158,7 @@ export default function Agent() {
             <div style={{ display: 'grid', gap: '9px' }}>
               {todayPlan.topTasks.map((task) => (
                 <div key={task.id} style={{ display: 'flex', justifyContent: 'space-between', gap: '8px', color: 'var(--text-secondary)' }}>
-                  <span>{task.title}</span>
+                  <span>{spanishText(task.title)}</span>
                   <span style={{ color: task.priority === 'Alta' ? 'var(--status-error)' : 'var(--status-warning)' }}>●</span>
                 </div>
               ))}
@@ -171,9 +172,9 @@ export default function Agent() {
             {recommendedOpportunity ? <Badge tone="mint">Aplica para ti</Badge> : null}
           </Card>
           <Card>
-            <h2 style={{ fontSize: '16px', fontWeight: 800, marginBottom: '8px' }}>Proximo comite</h2>
+            <h2 style={{ fontSize: '16px', fontWeight: 800, marginBottom: '8px' }}>Próximo comité</h2>
             <p className="display-font" style={{ fontSize: '30px', color: 'var(--primary)' }}>11d</p>
-            <p style={{ color: 'var(--text-secondary)' }}>Direccion mensual</p>
+            <p style={{ color: 'var(--text-secondary)' }}>Dirección mensual</p>
           </Card>
           <Button variant="secondary" onClick={() => continueToNextAction(navigate)}>
             Continuar prioridad

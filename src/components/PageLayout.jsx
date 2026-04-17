@@ -7,7 +7,7 @@ export default function PageLayout({ sidebarOpen, onCloseSidebar, onToggleSideba
     <div className="app-layout">
       {sidebarOpen ? (
         <button
-          aria-label="Cerrar menu"
+          aria-label="Cerrar menú"
           className="sidebar-overlay"
           onClick={onCloseSidebar}
           style={{

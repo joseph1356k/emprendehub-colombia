@@ -3,6 +3,7 @@ import { CheckCircle2, FileText, FolderOpen, Upload, Wand2 } from 'lucide-react'
 import { Badge, Button, Card, EmptyState, PageHeader } from '../components/ui';
 import { useApp } from '../context/AppContext';
 import { TASK_DOCUMENT_RULES } from '../data/mockData';
+import { spanishText } from '../utils/spanishText';
 
 export default function Documents() {
   const { tasks, documents, uploadTaskDocument, generateTaskTemplate } = useApp();
@@ -36,7 +37,7 @@ export default function Documents() {
       <PageHeader
         kicker="Archivo"
         title="Documentos"
-        subtitle="Plantillas y archivos conectados con el plan de accion. Cada documento debe destrabar una tarea concreta."
+        subtitle="Plantillas y archivos conectados con el plan de acción. Cada documento debe destrabar una tarea concreta."
         action={
           <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
             <select
@@ -48,7 +49,7 @@ export default function Documents() {
             >
               {requiredTasks.length === 0 ? <option>Sin tareas documentales</option> : null}
               {requiredTasks.map((task) => (
-                <option key={task.id} value={task.id}>{task.title}</option>
+                <option key={task.id} value={task.id}>{spanishText(task.title)}</option>
               ))}
             </select>
             <Button variant="secondary" onClick={createTemplate} disabled={!selectedTask || working}>
@@ -71,7 +72,7 @@ export default function Documents() {
         {documents.length === 0 ? (
           <EmptyState
             icon={<FolderOpen size={34} />}
-            title="Aun no hay documentos registrados"
+            title="Aún no hay documentos registrados"
             description="Genera una plantilla o sube el primer archivo asociado al plan."
           />
         ) : (
@@ -79,7 +80,7 @@ export default function Documents() {
             <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '760px' }}>
               <thead>
                 <tr style={{ background: 'var(--bg-panel)', borderBottom: '1px solid var(--border)' }}>
-                  {['Documento', 'Categoria', 'Estado', 'Tipo', 'Relacionado'].map((header) => (
+                  {['Documento', 'Categoría', 'Estado', 'Tipo', 'Relacionado'].map((header) => (
                     <th key={header} style={{ padding: '16px 18px', textAlign: 'left', fontSize: '12px', color: 'var(--text-secondary)', textTransform: 'uppercase' }}>
                       {header}
                     </th>
@@ -110,7 +111,7 @@ export default function Documents() {
                         <Badge tone={isDone ? 'mint' : 'warning'}>{isDone ? <CheckCircle2 size={12} /> : null} {doc.status}</Badge>
                       </td>
                       <td style={{ padding: '16px 18px', color: 'var(--text-secondary)' }}>{doc.file_type || 'N/A'}</td>
-                      <td style={{ padding: '16px 18px', color: 'var(--text-secondary)' }}>{relatedTask ? relatedTask.title : 'General'}</td>
+                      <td style={{ padding: '16px 18px', color: 'var(--text-secondary)' }}>{relatedTask ? spanishText(relatedTask.title) : 'General'}</td>
                     </tr>
                   );
                 })}

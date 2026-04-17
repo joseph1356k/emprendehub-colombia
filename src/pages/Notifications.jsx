@@ -45,7 +45,7 @@ export default function Notifications() {
     { type: 'opportunity_deadline', label: 'Cierres de convocatorias guardadas' },
     { type: 'blocker_task', label: 'Tareas bloqueadas' },
     { type: 'missing_document', label: 'Documentos faltantes' },
-    { type: 'diagnostic_reminder', label: 'Recordatorio de diagnostico' },
+    { type: 'diagnostic_reminder', label: 'Recordatorio de diagnóstico' },
   ];
 
   return (
@@ -53,10 +53,10 @@ export default function Notifications() {
       <PageHeader
         kicker="Alertas"
         title="Centro de notificaciones"
-        subtitle="Solo alertas utiles: maximo 3 notificaciones al dia, agrupadas por tipo."
+        subtitle="Solo alertas útiles: máximo 3 notificaciones al día, agrupadas por tipo."
         action={
           <button className="btn btn-secondary" onClick={markAllNotificationsRead} style={{ gap: '8px' }}>
-            <CheckCheck size={15} /> Marcar todo leido
+            <CheckCheck size={15} /> Marcar todo leído
           </button>
         }
       />
@@ -108,7 +108,7 @@ export default function Notifications() {
           <div style={{ textAlign: 'center', padding: '48px 20px', color: 'var(--text-tertiary)' }}>
             <BellOff size={32} style={{ marginBottom: '10px' }} />
             <p style={{ fontWeight: 700 }}>No hay notificaciones en este filtro</p>
-            <p style={{ fontSize: '13px', marginTop: '4px' }}>Las nuevas alertas utiles apareceran aqui.</p>
+            <p style={{ fontSize: '13px', marginTop: '4px' }}>Las nuevas alertas útiles apareceran aqui.</p>
           </div>
         ) : (
           filtered.map((item, index) => (
@@ -125,7 +125,7 @@ export default function Notifications() {
                 cursor: item.read ? 'default' : 'pointer',
                 transition: 'var(--transition)',
               }}
-              title={item.read ? 'Leida' : 'Marcar como leida'}
+              title={item.read ? 'Leída' : 'Marcar como leída'}
             >
               <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
                 <div style={{ width: '28px', height: '28px', borderRadius: '50%', backgroundColor: item.read ? '#f1f5f9' : '#d1fae5', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>

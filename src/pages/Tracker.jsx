@@ -3,10 +3,11 @@ import { useNavigate } from 'react-router-dom';
 import { BookOpen, CheckCircle2, Target, TrendingUp } from 'lucide-react';
 import { Badge, Button, Card, EmptyState, PageHeader, StatCard } from '../components/ui';
 import { useApp } from '../context/AppContext';
+import { spanishText } from '../utils/spanishText';
 
 const BADGES = [
   { id: 'first-task', label: 'Primer paso', desc: 'Primera tarea completada', check: ({ completedTasks }) => completedTasks >= 1 },
-  { id: 'diagnostic', label: 'Contexto claro', desc: 'Diagnostico completado', check: ({ diagnosticCompleted }) => diagnosticCompleted },
+  { id: 'diagnostic', label: 'Contexto claro', desc: 'Diagnóstico completado', check: ({ diagnosticCompleted }) => diagnosticCompleted },
   { id: 'five-tasks', label: 'Ejecutor', desc: 'Cinco tareas completadas', check: ({ completedTasks }) => completedTasks >= 5 },
   { id: 'first-course', label: 'Aprendizaje activo', desc: 'Primer curso iniciado', check: ({ courseProgress }) => Object.values(courseProgress).some((p) => p > 0) },
   { id: 'first-course-done', label: 'Ciclo cerrado', desc: 'Primer curso completado', check: ({ completedCourses }) => completedCourses >= 1 },
@@ -16,10 +17,10 @@ const BADGES = [
 ];
 
 const HEALTH_METRICS = [
-  { label: 'Formalizacion', tasks: ['Registrar RUT en DIAN', 'Crear empresa (SAS o Persona Natural)', 'Registro en Camara de Comercio'] },
+  { label: 'Formalización', tasks: ['Registrar RUT en DIAN', 'Crear empresa (SAS o Persona Natural)', 'Registro en Cámara de Comercio'] },
   { label: 'Producto', tasks: ['Definir propuesta de valor', 'Construir o definir MVP', 'Realizar 10 entrevistas de usuario'] },
-  { label: 'Mercadeo', tasks: ['Definir buyer persona', 'Crear perfiles en redes sociales', 'Definir canales de adquisicion'] },
-  { label: 'Financiero', tasks: ['Definir modelo de ingresos', 'Armar proyecciones financieras basicas'] },
+  { label: 'Mercadeo', tasks: ['Definir buyer persona', 'Crear perfiles en redes sociales', 'Definir canales de adquisición'] },
+  { label: 'Financiero', tasks: ['Definir modelo de ingresos', 'Armar proyecciones financieras básicas'] },
 ];
 
 export default function Tracker() {
@@ -46,7 +47,7 @@ export default function Tracker() {
   );
 
   const healthScores = HEALTH_METRICS.map((metric) => {
-    const relevant = tasks.filter((task) => metric.tasks.includes(task.title));
+    const relevant = tasks.filter((task) => metric.tasks.includes(spanishText(task.title)));
     const done = relevant.filter((task) => task.status === 'completado').length;
     const pct = relevant.length > 0 ? Math.round((done / relevant.length) * 100) : 0;
     return { ...metric, pct, done, total: relevant.length };
@@ -59,12 +60,12 @@ export default function Tracker() {
       <PageHeader
         kicker="Progreso"
         title="Seguimiento"
-        subtitle="Tu avance del mes, puntos, logros y actividad reciente dentro de Soe."
+        subtitle="Tu avance del mes, puntos, logros y actividad reciente dentro de SOE."
       />
 
       <div className="section-grid-3" style={{ marginBottom: '22px' }}>
         <StatCard value={points} label={`Nivel ${levelNum}: ${level}`} helper={`${levelProgress}% hacia el siguiente nivel`} />
-        <StatCard value={`${progressPercent}%`} label="Plan de accion" helper={`${completedTasks} tareas completadas`} icon={<TrendingUp size={22} />} onClick={() => navigate('/ruta')} />
+        <StatCard value={`${progressPercent}%`} label="Plan de acción" helper={`${completedTasks} tareas completadas`} icon={<TrendingUp size={22} />} onClick={() => navigate('/ruta')} />
         <StatCard value={overallHealth} label="Estado del negocio" helper="Promedio de areas clave" tone={overallHealth >= 70 ? 'success' : 'warning'} />
       </div>
 
@@ -77,7 +78,7 @@ export default function Tracker() {
           <div className="progress-fill" style={{ width: `${levelProgress}%` }} />
         </div>
         <p style={{ marginTop: '10px', color: 'var(--text-secondary)', fontSize: '14px' }}>
-          {nextLevelPoints - points > 0 ? `Faltan ${nextLevelPoints - points} puntos para el siguiente nivel.` : 'Nivel maximo alcanzado.'}
+          {nextLevelPoints - points > 0 ? `Faltan ${nextLevelPoints - points} puntos para el siguiente nivel.` : 'Nivel máximo alcanzado.'}
         </p>
       </Card>
 
@@ -117,7 +118,7 @@ export default function Tracker() {
       </div>
 
       <div className="section-grid-3" style={{ marginBottom: '22px' }}>
-        <StatCard value={completedTasks} label="Tareas" helper="Acciones cerradas" icon={<CheckCircle2 size={22} />} onClick={() => navigate('/ruta')} />
+        <StatCard value={completedTasks} label="Tareas" helper="Acciónes cerradas" icon={<CheckCircle2 size={22} />} onClick={() => navigate('/ruta')} />
         <StatCard value={completedCourses} label="Biblioteca" helper="Cursos completados" icon={<BookOpen size={22} />} onClick={() => navigate('/cursos')} />
         <StatCard value={savedOpportunities.length} label="Oportunidades" helper="Guardadas" icon={<Target size={22} />} onClick={() => navigate('/oportunidades')} />
       </div>
@@ -126,15 +127,15 @@ export default function Tracker() {
         <h2 className="page-kicker" style={{ marginBottom: '16px' }}>Actividad reciente</h2>
         {activityEvents.length === 0 ? (
           <EmptyState
-            title="Aun no hay actividad"
-            description="Completa el diagnostico o una tarea para construir tu historial."
-            action={<Button onClick={() => navigate('/diagnostico')}>Hacer diagnostico</Button>}
+            title="Aún no hay actividad"
+            description="Completa el diagnóstico o una tarea para construir tu historial."
+            action={<Button onClick={() => navigate('/diagnostico')}>Hacer diagnóstico</Button>}
           />
         ) : (
           <div style={{ display: 'grid', gap: 0 }}>
             {activityEvents.slice(0, 15).map((event, index) => (
               <div key={event.id} style={{ padding: '14px 0', borderBottom: index < activityEvents.length - 1 ? '1px solid var(--border)' : 'none' }}>
-                <p style={{ fontWeight: 800 }}>{event.description}</p>
+                <p style={{ fontWeight: 800 }}>{spanishText(event.description)}</p>
                 <p style={{ color: 'var(--text-secondary)', fontSize: '13px', marginTop: '3px' }}>
                   {new Date(event.created_at || event.timestamp).toLocaleString('es-CO', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
                 </p>

@@ -28,7 +28,7 @@ export default function Providers() {
       <PageHeader
         kicker="Red experta"
         title="Empresas y servicios"
-        subtitle="Opciones conservadas por valor operativo: legal, finanzas, tecnologia, marca y direccion externa."
+        subtitle="Opciónes conservadas por valor operativo: legal, finanzas, tecnología, marca y dirección externa."
       />
 
       <Card style={{ marginBottom: '18px', padding: '16px' }}>
@@ -52,7 +52,7 @@ export default function Providers() {
 
       {filtered.length === 0 ? (
         <Card>
-          <EmptyState title="Sin resultados" description="Ajusta la busqueda o cambia la categoria." />
+          <EmptyState title="Sin resultados" description="Ajusta la búsqueda o cambia la categoría." />
         </Card>
       ) : (
         <div className="section-grid-3">
@@ -120,7 +120,7 @@ export default function Providers() {
               <div>
                 <Badge tone="info">{providerDetail.category}</Badge>
                 <h2 className="page-title" style={{ fontSize: '32px', marginTop: '12px' }}>{providerDetail.name}</h2>
-                <p style={{ color: 'var(--text-secondary)', marginTop: '6px' }}>{providerDetail.city} · Calificacion {providerDetail.rating}</p>
+                <p style={{ color: 'var(--text-secondary)', marginTop: '6px' }}>{providerDetail.city} · Calificación {providerDetail.rating}</p>
               </div>
               <button className="btn-ghost" onClick={() => setProfileId(null)} aria-label="Cerrar perfil">
                 <X size={18} />

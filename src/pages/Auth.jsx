@@ -35,9 +35,9 @@ export default function Auth({ onLogin, initialMode = 'login' }) {
         }
       }
     } catch (err) {
-      const message = err.message || 'Ocurrio un error. Intenta de nuevo.';
+      const message = err.message || 'Ocurrió un error. Intenta de nuevo.';
       if (message.includes('Invalid login credentials')) {
-        setError('Correo o contrasena incorrectos.');
+        setError('Correo o contraseña incorrectos.');
       } else if (message.includes('User already registered')) {
         setError('Este correo ya tiene una cuenta. Ingresa con tus datos.');
       } else {
@@ -63,7 +63,7 @@ export default function Auth({ onLogin, initialMode = 'login' }) {
       <Card className="animate-rise" style={{ width: '100%', maxWidth: '448px', padding: '42px 36px' }}>
         <div style={{ textAlign: 'center', marginBottom: '30px' }}>
           <Link to="/" className="brand-name" style={{ display: 'inline-block', marginBottom: '6px' }}>
-            Soe
+            SOE
           </Link>
           <p style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>Sistema operativo emprendedor</p>
         </div>
@@ -108,7 +108,7 @@ export default function Auth({ onLogin, initialMode = 'login' }) {
           ) : null}
 
           <div>
-            <Label htmlFor="email">Correo electronico</Label>
+            <Label htmlFor="email">Correo electrónico</Label>
             <div style={{ position: 'relative' }}>
               <Mail size={17} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-tertiary)' }} />
               <Input
@@ -124,13 +124,13 @@ export default function Auth({ onLogin, initialMode = 'login' }) {
           </div>
 
           <div>
-            <Label htmlFor="password">Contrasena</Label>
+            <Label htmlFor="password">Contraseña</Label>
             <div style={{ position: 'relative' }}>
               <Lock size={17} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-tertiary)' }} />
               <Input
                 id="password"
                 type="password"
-                placeholder="Minimo 6 caracteres"
+                placeholder="Mínimo 6 caracteres"
                 value={form.password}
                 onChange={(event) => update('password', event.target.value)}
                 style={{ paddingLeft: '42px' }}
@@ -141,7 +141,7 @@ export default function Auth({ onLogin, initialMode = 'login' }) {
           </div>
 
           <Button type="submit" disabled={loading} style={{ width: '100%', minHeight: '48px', marginTop: '6px' }}>
-            {loading ? 'Procesando...' : isLogin ? 'Entrar a Soe' : 'Solicitar acceso'}
+            {loading ? 'Procesando...' : isLogin ? 'Entrar a SOE' : 'Solicitar acceso'}
             {!loading ? <ArrowRight size={17} /> : null}
           </Button>
         </form>
@@ -154,7 +154,7 @@ export default function Auth({ onLogin, initialMode = 'login' }) {
               setError('');
             }}
           >
-            {isLogin ? 'No tienes cuenta? Solicita acceso' : 'Ya tienes cuenta? Inicia sesion'}
+            {isLogin ? '¿No tienes cuenta? Solicita acceso' : '¿Ya tienes cuenta? Inicia sesión'}
           </button>
           <div style={{ marginTop: '8px' }}>
             <Link className="btn-ghost btn-pill" to="/">

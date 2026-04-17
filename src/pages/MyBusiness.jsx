@@ -2,13 +2,14 @@ import React, { useState } from 'react';
 import { Eye, EyeOff, Save } from 'lucide-react';
 import { Badge, Button, Card, Input, Label, PageHeader, Textarea } from '../components/ui';
 import { useApp } from '../context/AppContext';
+import { spanishText } from '../utils/spanishText';
 
 const LOOKING_OPTIONS = [
   { id: 'capital', label: 'Capital' },
   { id: 'clientes', label: 'Clientes' },
   { id: 'aliados', label: 'Aliados' },
   { id: 'proveedores', label: 'Proveedores' },
-  { id: 'direccion', label: 'Direccion' },
+  { id: 'direccion', label: 'Dirección' },
 ];
 
 export default function MyBusiness() {
@@ -64,7 +65,7 @@ export default function MyBusiness() {
       <PageHeader
         kicker="Mi negocio"
         title="Perfil del negocio"
-        subtitle="Contexto vivo para que Soe entienda oferta, etapa, foco y necesidades del ciclo."
+        subtitle="Contexto vivo para que SOE entienda oferta, etapa, foco y necesidades del ciclo."
         action={
           <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
             <button
@@ -86,7 +87,7 @@ export default function MyBusiness() {
         <Card>
           <div className="section-grid-2" style={{ marginBottom: '18px' }}>
             {field('Nombre del negocio', 'name', 'Nombre del negocio')}
-            {field('Categoria', 'category', 'Sector o categoria')}
+            {field('Categoría', 'category', 'Sector o categoría')}
             {field('Ciudad', 'city', 'Ciudad base')}
             {field('Sitio web', 'website', 'www.tunegocio.co')}
             {field('Instagram', 'instagram', '@usuario')}
@@ -95,7 +96,7 @@ export default function MyBusiness() {
           </div>
 
           {[
-            ['Descripcion del negocio', 'description', 'Que vendes, a quien y con que resultado.'],
+            ['Descripción del negocio', 'description', 'Qué vendes, a quién y con qué resultado.'],
             ['Problema que resuelve', 'problem_solved', 'Describe el dolor o trabajo que ayudas a resolver.'],
             ['Productos y servicios', 'services', 'Lista corta de ofertas principales.'],
           ].map(([label, key, placeholder]) => (
@@ -112,7 +113,7 @@ export default function MyBusiness() {
           ))}
 
           <div>
-            <Label>Que buscas ahora</Label>
+            <Label>Qué buscas ahora</Label>
             <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
               {LOOKING_OPTIONS.map((option) => {
                 const selected = form.looking_for.includes(option.id);
@@ -138,9 +139,9 @@ export default function MyBusiness() {
             <h2 className="display-font" style={{ fontSize: '30px', lineHeight: 1.1, marginTop: '18px' }}>
               {form.name || 'Nombre del negocio'}
             </h2>
-            <p style={{ color: 'var(--primary)', fontWeight: 800, marginTop: '8px' }}>{form.stage} · {form.category || 'Categoria'}</p>
+            <p style={{ color: 'var(--primary)', fontWeight: 800, marginTop: '8px' }}>{spanishText(form.stage)} · {form.category || 'Categoría'}</p>
             <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, marginTop: '16px' }}>
-              {form.description || 'Una descripcion clara ayuda a Soe a priorizar oportunidades y acciones.'}
+              {form.description || 'Una descripción clara ayuda a SOE a priorizar oportunidades y acciones.'}
             </p>
             {form.looking_for.length > 0 ? (
               <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '16px' }}>
@@ -153,9 +154,9 @@ export default function MyBusiness() {
           </Card>
 
           <Card style={{ background: 'var(--mint-soft)', borderColor: 'var(--mint)' }}>
-            <p style={{ color: 'var(--status-success)', fontWeight: 800 }}>Por que se conserva</p>
+            <p style={{ color: 'var(--status-success)', fontWeight: 800 }}>Por qué se conserva</p>
             <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, marginTop: '8px' }}>
-              Este perfil alimenta diagnostico, oportunidades y recomendaciones. Aporta valor directo al sistema Soe.
+              Este perfil alimenta diagnóstico, oportunidades y recomendaciones. Aporta valor directo al sistema SOE.
             </p>
           </Card>
         </aside>

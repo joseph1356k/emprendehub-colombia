@@ -3,8 +3,8 @@ import { ArrowRight, CheckCircle2 } from 'lucide-react';
 import { Button, Card } from '../components/ui';
 
 const STEPS = [
-  'Radiografia inicial del negocio',
-  'Plan de accion mensual',
+  'Radiografía inicial del negocio',
+  'Plan de acción mensual',
   'Seguimiento diario con tu agente',
 ];
 
@@ -23,7 +23,7 @@ export default function Onboarding({ session, onComplete }) {
     >
       <div style={{ width: '100%', maxWidth: '720px' }}>
         <div style={{ textAlign: 'center', marginBottom: '26px' }}>
-          <p className="brand-name">Soe</p>
+          <p className="brand-name">SOE</p>
           <p style={{ color: 'var(--text-secondary)', marginTop: '4px' }}>sistema operativo emprendedor</p>
         </div>
 
@@ -31,7 +31,7 @@ export default function Onboarding({ session, onComplete }) {
           <p className="page-kicker">Bienvenido, {name}</p>
           <h1 className="page-title" style={{ marginTop: '10px' }}>Primero ordenamos el negocio</h1>
           <p className="page-subtitle" style={{ margin: '16px auto 30px' }}>
-            El diagnostico le da contexto a Soe para priorizar tareas, detectar bloqueos y preparar tu primer plan de direccion.
+            El diagnóstico le da contexto a SOE para priorizar tareas, detectar bloqueos y preparar tu primer plan de dirección.
           </p>
 
           <div className="section-grid-3" style={{ marginBottom: '30px' }}>
@@ -45,7 +45,7 @@ export default function Onboarding({ session, onComplete }) {
 
           <div style={{ display: 'flex', justifyContent: 'center', gap: '12px', flexWrap: 'wrap' }}>
             <Button onClick={() => onComplete('/diagnostico')} style={{ minWidth: '220px' }}>
-              Hacer diagnostico <ArrowRight size={17} />
+              Hacer diagnóstico <ArrowRight size={17} />
             </Button>
             <Button variant="secondary" onClick={() => onComplete('/dashboard')} style={{ minWidth: '180px' }}>
               Ir al dashboard

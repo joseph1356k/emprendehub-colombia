@@ -4,6 +4,7 @@ import { AlertTriangle, ArrowRight, CalendarClock, Check, Circle, FileText, Squa
 import { Badge, Button, Card, EmptyState, PageHeader, StatCard } from '../components/ui';
 import { useApp } from '../context/AppContext';
 import { MOCK_OPPORTUNITIES } from '../data/mockData';
+import { spanishText } from '../utils/spanishText';
 
 const BUSINESS_AREAS = [
   { label: 'Ventas', sections: ['Mercadeo'], fallback: 3 },
@@ -15,7 +16,7 @@ const BUSINESS_AREAS = [
 
 function getGreeting() {
   const hour = new Date().getHours();
-  if (hour < 12) return 'Buenos dias';
+  if (hour < 12) return 'Buenos días';
   if (hour < 19) return 'Buenas tardes';
   return 'Buenas noches';
 }
@@ -80,8 +81,8 @@ export default function Dashboard() {
         title={`${getGreeting()}, ${name}`}
         subtitle={
           diagnosticCompleted
-            ? `Tienes ${pendingTasks.length} tareas pendientes esta semana. Tu proximo comite esta a 11 dias.`
-            : 'Completa el diagnostico para que Soe priorice tu plan de accion.'
+            ? `Tienes ${pendingTasks.length} tareas pendientes esta semana. Tu próximo comité está a 11 días.`
+            : 'Completa el diagnóstico para que SOE priorice tu plan de acción.'
         }
         action={<Button onClick={() => continueToNextAction(navigate)}>Continuar prioridad</Button>}
       />
@@ -90,10 +91,10 @@ export default function Dashboard() {
         <Card style={{ marginBottom: '18px', borderColor: 'var(--status-warning)', background: '#fffaf0' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', gap: '16px', alignItems: 'center', flexWrap: 'wrap' }}>
             <div>
-              <p style={{ fontWeight: 800, color: '#8a6730' }}>Diagnostico pendiente</p>
-              <p style={{ color: 'var(--text-secondary)', marginTop: '4px' }}>Activa recomendaciones y prioridades segun tu etapa real.</p>
+              <p style={{ fontWeight: 800, color: '#8a6730' }}>Diagnóstico pendiente</p>
+              <p style={{ color: 'var(--text-secondary)', marginTop: '4px' }}>Activa recomendaciones y prioridades según tu etapa real.</p>
             </div>
-            <Button variant="secondary" onClick={() => navigate('/diagnostico')}>Completar diagnostico</Button>
+            <Button variant="secondary" onClick={() => navigate('/diagnostico')}>Completar diagnóstico</Button>
           </div>
         </Card>
       ) : null}
@@ -115,8 +116,8 @@ export default function Dashboard() {
         />
         <StatCard
           value="11d"
-          label="Proximo comite"
-          helper="Direccion mensual"
+          label="Próximo comité"
+          helper="Dirección mensual"
           icon={<CalendarClock size={22} />}
           onClick={() => navigate('/mi-agente')}
         />
@@ -125,10 +126,10 @@ export default function Dashboard() {
       <Card style={{ marginBottom: '24px', padding: '28px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', gap: '18px', alignItems: 'flex-start', flexWrap: 'wrap', marginBottom: '22px' }}>
           <div>
-            <p className="page-kicker">Que hago hoy</p>
+            <p className="page-kicker">Qué hago hoy</p>
             <h2 className="page-title" style={{ fontSize: '34px', marginTop: '8px' }}>Tres acciones para mover el negocio</h2>
             <p className="page-subtitle" style={{ marginTop: '8px' }}>
-              Soe prioriza por bloqueo, fecha, etapa y velocidad de avance.
+              SOE prioriza por bloqueo, fecha, etapa y velocidad de avance.
             </p>
           </div>
           <Button onClick={() => continueToNextAction(navigate)}>
@@ -139,7 +140,7 @@ export default function Dashboard() {
         <div className="section-grid-2" style={{ alignItems: 'start' }}>
           <div style={{ display: 'grid', gap: '10px' }}>
             {todayPlan.topTasks.length === 0 ? (
-              <EmptyState title="No hay tareas pendientes" description="Tu siguiente ciclo se activara cuando agregues nuevas prioridades." />
+              <EmptyState title="No hay tareas pendientes" description="Tu siguiente ciclo se activará cuando agregues nuevas prioridades." />
             ) : (
               todayPlan.topTasks.map((task, index) => (
                 <button
@@ -161,13 +162,13 @@ export default function Dashboard() {
                     {index + 1}
                   </span>
                   <span>
-                    <span style={{ display: 'block', fontWeight: 800 }}>{task.title}</span>
+                    <span style={{ display: 'block', fontWeight: 800 }}>{spanishText(task.title)}</span>
                     <span style={{ display: 'block', color: 'var(--text-secondary)', fontSize: '13px' }}>
                       {task.scoreBreakdown?.length ? task.scoreBreakdown.join(' / ') : `${task.priority} prioridad`}
                     </span>
                   </span>
                   <Badge tone={task.status === 'bloqueado' ? 'warning' : task.documentStatus === 'Pendiente' ? 'info' : 'neutral'}>
-                    {task.status === 'bloqueado' ? 'Bloqueo' : task.documentStatus === 'Pendiente' ? 'Documento' : 'Accion'}
+                    {task.status === 'bloqueado' ? 'Bloqueo' : task.documentStatus === 'Pendiente' ? 'Documento' : 'Acción'}
                   </Badge>
                 </button>
               ))
@@ -180,7 +181,7 @@ export default function Dashboard() {
                 <AlertTriangle size={16} /> Bloqueo principal
               </p>
               <p style={{ color: 'var(--text-secondary)', marginTop: '6px' }}>
-                {todayPlan.blocker ? todayPlan.blocker.title : 'No hay bloqueos activos hoy.'}
+                {todayPlan.blocker ? spanishText(todayPlan.blocker.title) : 'No hay bloqueos activos hoy.'}
               </p>
             </div>
             <div style={{ padding: '15px', borderRadius: '16px', border: '1px solid var(--border)', background: 'var(--bg-panel)' }}>
@@ -188,7 +189,7 @@ export default function Dashboard() {
                 <Target size={16} /> Oportunidad recomendada
               </p>
               <p style={{ color: 'var(--text-secondary)', marginTop: '6px' }}>
-                {todayPlan.recommendedOpportunity?.title || 'Sin recomendacion activa por ahora.'}
+                {todayPlan.recommendedOpportunity?.title || 'Sin recomendación activa por ahora.'}
               </p>
             </div>
             <div style={{ padding: '15px', borderRadius: '16px', border: '1px solid var(--border)', background: todayPlan.missingDocument ? 'var(--mint-soft)' : 'var(--bg-panel)' }}>
@@ -197,7 +198,7 @@ export default function Dashboard() {
               </p>
               <p style={{ color: 'var(--text-secondary)', marginTop: '6px' }}>
                 {todayPlan.missingDocument
-                  ? `${todayPlan.missingDocument.documentRequirement?.docType} para ${todayPlan.missingDocument.title}`
+                  ? `${todayPlan.missingDocument.documentRequirement?.docType} para ${spanishText(todayPlan.missingDocument.title)}`
                   : 'No hay documentos obligatorios pendientes.'}
               </p>
             </div>
@@ -251,7 +252,7 @@ export default function Dashboard() {
                       {done ? <Check size={13} /> : null}
                     </span>
                     <span>
-                      <span style={{ display: 'block', fontWeight: 800, color: done ? 'var(--text-tertiary)' : 'var(--text-primary)' }}>{task.title}</span>
+                      <span style={{ display: 'block', fontWeight: 800, color: done ? 'var(--text-tertiary)' : 'var(--text-primary)' }}>{spanishText(task.title)}</span>
                       <span style={{ display: 'block', color: 'var(--text-secondary)', fontSize: '13px' }}>
                         {done ? 'Completada' : task.priority === 'Alta' ? 'Alta prioridad' : 'Vence pronto'}
                       </span>

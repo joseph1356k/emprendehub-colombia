@@ -115,7 +115,7 @@ export function StatCard({ value, label, helper, tone = 'primary', icon, onClick
 
 export function TabsPills({ items }) {
   return (
-    <div className="topbar-tabs" role="tablist" aria-label="Navegacion principal">
+    <div className="topbar-tabs" role="tablist" aria-label="Navegación principal">
       {items.map((item) => item)}
     </div>
   );

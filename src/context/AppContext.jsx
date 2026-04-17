@@ -5,15 +5,16 @@ import {
   MOCK_OPPORTUNITIES,
   TASK_DOCUMENT_RULES,
 } from '../data/mockData';
+import { spanishText } from '../utils/spanishText';
 
 const AppContext = createContext(null);
 
 const STAGE_SECTION_WEIGHT = {
-  Idea: { 'Producto / Servicio': 28, Formalizacion: 22, Mercadeo: 16, Financiero: 14, Inversion: 8 },
-  Validacion: { 'Producto / Servicio': 26, Mercadeo: 20, Financiero: 18, Formalizacion: 14, Inversion: 10 },
-  Traccion: { Mercadeo: 24, Financiero: 20, Inversion: 20, 'Producto / Servicio': 14, Formalizacion: 8 },
-  Crecimiento: { Inversion: 24, Mercadeo: 20, Financiero: 18, 'Producto / Servicio': 14, Formalizacion: 8 },
-  Escalamiento: { Inversion: 28, Financiero: 20, Mercadeo: 16, 'Producto / Servicio': 12, Formalizacion: 6 },
+  Idea: { 'Producto / Servicio': 28, Formalizacion: 22, 'Formalización': 22, Mercadeo: 16, Financiero: 14, Inversion: 8, 'Inversión': 8 },
+  Validacion: { 'Producto / Servicio': 26, Mercadeo: 20, Financiero: 18, Formalizacion: 14, 'Formalización': 14, Inversion: 10, 'Inversión': 10 },
+  Traccion: { Mercadeo: 24, Financiero: 20, Inversion: 20, 'Inversión': 20, 'Producto / Servicio': 14, Formalizacion: 8, 'Formalización': 8 },
+  Crecimiento: { Inversion: 24, 'Inversión': 24, Mercadeo: 20, Financiero: 18, 'Producto / Servicio': 14, Formalizacion: 8, 'Formalización': 8 },
+  Escalamiento: { Inversion: 28, 'Inversión': 28, Financiero: 20, Mercadeo: 16, 'Producto / Servicio': 12, Formalizacion: 6, 'Formalización': 6 },
 };
 
 const STATUS_SCORE = { bloqueado: 40, 'en progreso': 12, pendiente: 8, completado: -200 };
@@ -50,12 +51,12 @@ const canUseTable = (error) => {
 
 const parseDeadlineDays = (task) => {
   if (task.due_date) return getDayDiff(task.due_date);
-  const fallbackDue = TASK_DEFAULT_DUE_BY_TITLE[task.title];
+  const fallbackDue = TASK_DEFAULT_DUE_BY_TITLE[task.title] ?? TASK_DEFAULT_DUE_BY_TITLE[spanishText(task.title)];
   if (typeof fallbackDue === 'number') return fallbackDue;
   return null;
 };
 
-const taskRequirement = (task) => TASK_DOCUMENT_RULES[task?.title] || null;
+const taskRequirement = (task) => TASK_DOCUMENT_RULES[task?.title] || TASK_DOCUMENT_RULES[spanishText(task?.title)] || null;
 const normalizeStage = (stage) => {
   const map = {
     'Validación': 'Validacion',
@@ -460,8 +461,8 @@ export function AppProvider({ children, session }) {
           .eq('user_id', session.user.id);
 
         setProfile((prev) => ({ ...prev, stage, points: newPoints }));
-        showToast('Diagnostico guardado. Ruta personalizada lista.');
-        await addActivity('Diagnostico completado', 'diagnostic');
+        showToast('Diagnóstico guardado. Ruta personalizada lista.');
+        await addActivity('Diagnóstico completado', 'diagnostic');
       }
 
       return { data, error };
@@ -493,7 +494,7 @@ export function AppProvider({ children, session }) {
             await createNotification({
               type: 'blocker_task',
               title: 'Tarea bloqueada',
-              message: `${data.title} esta bloqueada. Revisa que falta para desbloquear.`,
+              message: `${data.title} está bloqueada. Revisa que falta para desbloquear.`,
               dedupeKey: `blocker-${data.id}`,
             });
             await addActivity(`Bloqueo en tarea: ${data.title}`, 'blocker');
@@ -548,7 +549,7 @@ export function AppProvider({ children, session }) {
           await createNotification({
             type: 'opportunity_deadline',
             title: 'Convocatoria guardada cierra pronto',
-            message: `${opp.title} cierra en ${deadlineDays} dia(s).`,
+            message: `${opp.title} cierra en ${deadlineDays} día(s).`,
             dedupeKey: `opp-deadline-${opp.id}-${todayKey()}`,
           });
         }
@@ -851,7 +852,7 @@ export function AppProvider({ children, session }) {
       return { ...opp, recommendationScore: score, stageMatch, saved, deadlineDays };
     })
       .sort((a, b) => b.recommendationScore - a.recommendationScore)
-      .find((item) => item.status === 'Abierta' || item.status === 'Proximamente');
+      .find((item) => item.status === 'Abierta' || item.status === 'Próximamente');
 
     return available || null;
   }, [profile?.stage, savedOpportunities]);
@@ -876,7 +877,7 @@ export function AppProvider({ children, session }) {
   const nextAction = useMemo(() => {
     if (!diagnosticCompleted) {
       return {
-        label: 'Completar diagnostico',
+        label: 'Completar diagnóstico',
         subtitle: 'Personaliza tu ruta para desbloquear recomendaciones.',
         route: '/diagnostico',
         kind: 'diagnostic',
@@ -906,7 +907,7 @@ export function AppProvider({ children, session }) {
     if (pendingTasks.length > 0) {
       return {
         label: `Continuar tarea: ${pendingTasks[0].title}`,
-        subtitle: 'Siguiente mejor accion priorizada.',
+        subtitle: 'Siguiente mejor acción priorizada.',
         route: '/ruta',
         kind: 'task',
         taskId: pendingTasks[0].id,
@@ -925,7 +926,7 @@ export function AppProvider({ children, session }) {
 
     return {
       label: 'Ir al panel',
-      subtitle: 'Tu siguiente accion estara aqui.',
+      subtitle: 'Tu siguiente acción estará aquí.',
       route: '/dashboard',
       kind: 'fallback',
     };
@@ -991,7 +992,7 @@ export function AppProvider({ children, session }) {
       await createNotification({
         type: 'diagnostic_reminder',
         title: 'Recordatorio suave',
-        message: 'Completa el diagnostico para activar recomendaciones personalizadas.',
+        message: 'Completa el diagnóstico para activar recomendaciones personalizadas.',
         dedupeKey: `diag-reminder-${todayKey()}`,
       });
     }
@@ -1008,7 +1009,7 @@ export function AppProvider({ children, session }) {
       await createNotification({
         type: 'opportunity_deadline',
         title: 'Convocatoria guardada cierra pronto',
-        message: `${savedOpenSoon.title} cierra en ${daysLeft} dia(s).`,
+        message: `${savedOpenSoon.title} cierra en ${daysLeft} día(s).`,
         dedupeKey: `saved-opp-deadline-${savedOpenSoon.id}-${todayKey()}`,
       });
     }
