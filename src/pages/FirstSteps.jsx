@@ -1,148 +1,142 @@
-import React, { useState } from 'react';
-import { CheckCircle2, Circle, ChevronDown, ChevronUp, CheckSquare, ExternalLink } from 'lucide-react';
+import React, { useMemo, useState } from 'react';
+import { Check, ExternalLink } from 'lucide-react';
+import { Badge, Button, Card, EmptyState, PageHeader } from '../components/ui';
 import { useApp } from '../context/AppContext';
 
 const FIRST_STEPS_SECTIONS = ['Formalizacion', 'Producto / Servicio', 'Financiero', 'Mercadeo'];
 
 const STEP_INFO = {
-    'Registrar RUT en DIAN': { emoji: '📄', url: 'https://www.dian.gov.co/', tip: 'Trámite gratuito y 100% en línea desde la página de la DIAN.' },
-    'Crear empresa (SAS o Persona Natural)': { emoji: '🏛️', url: 'https://www.ccb.org.co/', tip: 'La SAS es la figura más flexible para startups en Colombia.' },
-    'Registro en Camara de Comercio': { emoji: '📋', url: 'https://www.ccb.org.co/', tip: 'La matricula mercantil te da identidad legal como empresa.' },
-    'Abrir cuenta bancaria empresarial': { emoji: '🏦', url: '#', tip: 'Separa las finanzas personales de las empresariales desde el inicio.' },
-    'Definir propuesta de valor': { emoji: '💡', url: '#', tip: 'Usa el Value Proposition Canvas de Strategyzer para estructurarla.' },
-    'Construir o definir MVP': { emoji: '🔧', url: '#', tip: 'El MVP debe validar tu hipótesis central con el menor esfuerzo posible.' },
-    'Realizar 10 entrevistas de usuario': { emoji: '🎤', url: '#', tip: 'Usa preguntas abiertas. Nunca preguntes "usarias esto"; observa comportamientos.' },
-    'Iterar producto con feedback recibido': { emoji: '🔄', url: '#', tip: 'Documenta cada aprendizaje. Cada iteración debe tener una hipótesis clara.' },
-    'Definir modelo de ingresos': { emoji: '💰', url: '#', tip: 'Explora: suscripción, comisión, freemium, venta directa, licencia.' },
-    'Armar proyecciones financieras basicas': { emoji: '📊', url: '#', tip: 'Proyecta a 12 meses minimo: ingresos, costos fijos, variables y punto de equilibrio.' },
-    'Calcular punto de equilibrio': { emoji: '⚖️', url: '#', tip: 'Punto de equilibrio = Costos Fijos / (Precio - Costo Variable Unitario)' },
-    'Definir buyer persona': { emoji: '👤', url: '#', tip: 'Incluye: nombre ficticio, edad, trabajo, frustraciones, objetivos y dónde se informa.' },
-    'Crear perfiles en redes sociales': { emoji: '📱', url: '#', tip: 'Elige 1-2 plataformas donde esté tu audiencia. No intentes estar en todas.' },
-    'Definir canales de adquisicion': { emoji: '📡', url: '#', tip: 'Prueba 2-3 canales en paralelo. Mide y dobla en el que funcione.' },
-    'Disenar identidad de marca basica': { emoji: '🎨', url: '#', tip: 'Usa Canva para crear logo, paleta de colores y tipografia consistente.' },
+  'Registrar RUT en DIAN': { url: 'https://www.dian.gov.co/', tip: 'Tramite base para ordenar obligaciones y facturacion.' },
+  'Crear empresa (SAS o Persona Natural)': { url: 'https://www.ccb.org.co/', tip: 'Define figura juridica segun riesgo, socios y operacion.' },
+  'Registro en Camara de Comercio': { url: 'https://www.ccb.org.co/', tip: 'Da identidad legal al negocio y habilita procesos comerciales.' },
+  'Abrir cuenta bancaria empresarial': { tip: 'Separa finanzas personales y operativas desde el primer ciclo.' },
+  'Definir propuesta de valor': { tip: 'Resume cliente, problema, resultado y diferencia concreta.' },
+  'Construir o definir MVP': { tip: 'Valida la hipotesis central con el menor esfuerzo posible.' },
+  'Realizar 10 entrevistas de usuario': { tip: 'Usa preguntas abiertas y documenta comportamientos reales.' },
+  'Iterar producto con feedback recibido': { tip: 'Cada ajuste debe responder a una senal del mercado.' },
+  'Definir modelo de ingresos': { tip: 'Aterriza como entra dinero, recurrencia, margen y cobro.' },
+  'Armar proyecciones financieras basicas': { tip: 'Proyecta ingresos, costos y caja para tomar decisiones.' },
+  'Calcular punto de equilibrio': { tip: 'Identifica el volumen minimo para no operar a ciegas.' },
+  'Definir buyer persona': { tip: 'Define quien compra, quien decide y que objeciones aparecen.' },
+  'Crear perfiles en redes sociales': { tip: 'Elige pocos canales y mide conversaciones, no solo alcance.' },
+  'Definir canales de adquisicion': { tip: 'Prueba canales con criterio de costo, velocidad y conversion.' },
+  'Disenar identidad de marca basica': { tip: 'Asegura consistencia minima para vender con claridad.' },
 };
 
 export default function FirstSteps() {
-    const { tasks, updateTask, progressPercent, completedTasks, totalTasks } = useApp();
-    const [expanded, setExpanded] = useState({});
+  const { tasks, updateTask, progressPercent, completedTasks, totalTasks } = useApp();
+  const [updatingId, setUpdatingId] = useState(null);
 
-    const relevantSections = FIRST_STEPS_SECTIONS;
-    const sectionTasks = relevantSections.reduce((acc, sec) => {
-        acc[sec] = tasks.filter(t => t.section === sec);
-        return acc;
+  const sectionTasks = useMemo(() => {
+    return FIRST_STEPS_SECTIONS.reduce((acc, section) => {
+      acc[section] = tasks.filter((task) => task.section === section);
+      return acc;
     }, {});
+  }, [tasks]);
 
-    const toggle = (section) => setExpanded(p => ({ ...p, [section]: !p[section] }));
+  const handleCheck = async (task) => {
+    setUpdatingId(task.id);
+    await updateTask(task.id, task.status === 'completado' ? 'pendiente' : 'completado');
+    setUpdatingId(null);
+  };
 
-    const [updatingId, setUpdatingId] = useState(null);
-    const handleCheck = async (task) => {
-        setUpdatingId(task.id);
-        const newStatus = task.status === 'completado' ? 'pendiente' : 'completado';
-        await updateTask(task.id, newStatus);
-        setUpdatingId(null);
-    };
+  const visibleSections = FIRST_STEPS_SECTIONS.filter((section) => sectionTasks[section]?.length);
 
-    return (
-        <div className="page-shell animate-fade-in">
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '28px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                    <div style={{ padding: '10px', backgroundColor: '#f0fdf4', borderRadius: '12px' }}>
-                        <CheckSquare size={22} style={{ color: 'var(--primary)' }} />
-                    </div>
-                    <div>
-                        <h1 style={{ fontSize: '22px', fontWeight: 800 }}>Primeros Pasos</h1>
-                        <p style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>Checklist de arranque para tu emprendimiento.</p>
-                    </div>
-                </div>
-                <div style={{ textAlign: 'right' }}>
-                    <p style={{ fontSize: '26px', fontWeight: 800 }}>{completedTasks}/{totalTasks}</p>
-                    <p style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>tareas completadas</p>
-                </div>
-            </div>
+  return (
+    <div className="page-shell animate-fade-in">
+      <PageHeader
+        kicker="Base operativa"
+        title="Primeros pasos"
+        subtitle="Acciones fundacionales que conviene conservar porque destraban la estructura minima del negocio."
+      />
 
-            {/* Progress */}
-            <div className="card" style={{ padding: '18px 22px', marginBottom: '22px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-                    <span style={{ fontWeight: 600, fontSize: '14px' }}>Progreso general</span>
-                    <span style={{ fontWeight: 700, color: 'var(--primary)' }}>{progressPercent}%</span>
-                </div>
-                <div style={{ height: '8px', backgroundColor: 'var(--border)', borderRadius: '8px' }}>
-                    <div style={{ height: '100%', width: `${progressPercent}%`, backgroundColor: 'var(--primary)', borderRadius: '8px', transition: '0.6s ease' }} />
-                </div>
-                <p style={{ fontSize: '12px', color: 'var(--text-tertiary)', marginTop: '8px' }}>
-                    💡 Marca una tarea como completada haciendo clic en el checkbox. Los cambios se sincronizan en toda la app.
-                </p>
-            </div>
-
-            {relevantSections.map(section => {
-                const secTasks = sectionTasks[section];
-                if (!secTasks || secTasks.length === 0) return null;
-                const completed = secTasks.filter(t => t.status === 'completado').length;
-                const pct = Math.round((completed / secTasks.length) * 100);
-                const isExpanded = expanded[section] !== false; // default open
-
-                return (
-                    <div key={section} className="card" style={{ marginBottom: '14px', overflow: 'hidden' }}>
-                        <button onClick={() => toggle(section)}
-                            style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '12px', padding: '16px 20px', cursor: 'pointer', border: 'none', backgroundColor: 'transparent', fontFamily: 'var(--font-family)', textAlign: 'left' }}>
-                            <div style={{ flex: 1 }}>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '6px' }}>
-                                    <h3 style={{ fontWeight: 700, fontSize: '15px' }}>{section}</h3>
-                                    <span style={{ fontSize: '12px', padding: '2px 10px', borderRadius: '99px', fontWeight: 700, backgroundColor: pct === 100 ? '#d1fae5' : 'var(--bg-main)', color: pct === 100 ? '#065f46' : 'var(--text-secondary)' }}>
-                                        {completed}/{secTasks.length} {pct === 100 ? '✅' : ''}
-                                    </span>
-                                </div>
-                                <div style={{ height: '4px', backgroundColor: '#e2e8f0', borderRadius: '4px', width: '180px' }}>
-                                    <div style={{ height: '100%', width: `${pct}%`, backgroundColor: pct === 100 ? 'var(--primary)' : '#3b82f6', borderRadius: '4px', transition: '0.4s' }} />
-                                </div>
-                            </div>
-                            {isExpanded ? <ChevronUp size={18} style={{ color: 'var(--text-tertiary)' }} /> : <ChevronDown size={18} style={{ color: 'var(--text-tertiary)' }} />}
-                        </button>
-
-                        {isExpanded && (
-                            <div style={{ padding: '0 20px 16px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                                {secTasks.map(task => {
-                                    const info = STEP_INFO[task.title] || {};
-                                    const done = task.status === 'completado';
-                                    const busy = updatingId === task.id;
-                                    return (
-                                        <div key={task.id} style={{ border: `1px solid ${done ? '#bbf7d0' : 'var(--border)'}`, borderRadius: '10px', backgroundColor: done ? '#f0fdf4' : 'white', overflow: 'hidden' }}>
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '13px 16px' }}>
-                                                <button onClick={() => handleCheck(task)} disabled={busy}
-                                                    style={{ background: 'none', border: 'none', cursor: busy ? 'wait' : 'pointer', padding: 0, flexShrink: 0, opacity: busy ? 0.5 : 1 }}>
-                                                    {done ? <CheckCircle2 size={20} style={{ color: 'var(--primary)' }} /> : <Circle size={20} style={{ color: '#cbd5e1' }} />}
-                                                </button>
-                                                <span style={{ fontSize: '18px', flexShrink: 0 }}>{info.emoji || '📌'}</span>
-                                                <div style={{ flex: 1 }}>
-                                                    <p style={{ fontWeight: 600, fontSize: '14px', textDecoration: done ? 'line-through' : 'none', color: done ? 'var(--text-tertiary)' : 'var(--text-primary)' }}>
-                                                        {task.title}
-                                                    </p>
-                                                    <p style={{ fontSize: '11px', color: 'var(--text-tertiary)', marginTop: '2px' }}>{task.section}</p>
-                                                </div>
-                                                <span style={{ fontSize: '10px', padding: '2px 8px', borderRadius: '99px', fontWeight: 700, backgroundColor: task.priority === 'Alta' ? '#fee2e2' : task.priority === 'Media' ? '#fef9c3' : '#f1f5f9', color: task.priority === 'Alta' ? '#dc2626' : task.priority === 'Media' ? '#92400e' : '#64748b', flexShrink: 0 }}>
-                                                    {task.priority}
-                                                </span>
-                                            </div>
-                                            {info.tip && (
-                                                <div style={{ padding: '8px 16px 12px 52px', backgroundColor: done ? '#f0fdf4' : 'var(--bg-main)', borderTop: '1px solid var(--border)' }}>
-                                                    <p style={{ fontSize: '12px', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
-                                                        💡 {info.tip}
-                                                        {info.url && info.url !== '#' && (
-                                                            <a href={info.url} target="_blank" rel="noopener noreferrer" style={{ marginLeft: '8px', color: 'var(--primary)', fontWeight: 600, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
-                                                                Ver recurso <ExternalLink size={11} />
-                                                            </a>
-                                                        )}
-                                                    </p>
-                                                </div>
-                                            )}
-                                        </div>
-                                    );
-                                })}
-                            </div>
-                        )}
-                    </div>
-                );
-            })}
+      <Card style={{ marginBottom: '22px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', gap: '14px', marginBottom: '10px' }}>
+          <p style={{ fontWeight: 800 }}>Avance de base</p>
+          <p style={{ color: 'var(--primary)', fontWeight: 800 }}>{completedTasks}/{totalTasks} tareas</p>
         </div>
-    );
+        <div className="progress-bg">
+          <div className="progress-fill" style={{ width: `${progressPercent}%` }} />
+        </div>
+      </Card>
+
+      {visibleSections.length === 0 ? (
+        <Card>
+          <EmptyState title="Sin tareas base" description="El plan principal tomara prioridad cuando exista diagnostico." />
+        </Card>
+      ) : (
+        <div style={{ display: 'grid', gap: '18px' }}>
+          {visibleSections.map((section) => {
+            const items = sectionTasks[section];
+            const completed = items.filter((task) => task.status === 'completado').length;
+            const pct = Math.round((completed / items.length) * 100);
+
+            return (
+              <Card key={section}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', gap: '12px', alignItems: 'center', marginBottom: '12px' }}>
+                  <div>
+                    <p className="page-kicker">{section}</p>
+                    <h2 style={{ fontSize: '20px', fontWeight: 800, marginTop: '5px' }}>{completed}/{items.length} cerradas</h2>
+                  </div>
+                  <Badge tone={pct === 100 ? 'mint' : 'info'}>{pct}%</Badge>
+                </div>
+
+                {items.map((task, index) => {
+                  const done = task.status === 'completado';
+                  const info = STEP_INFO[task.title] || {};
+                  return (
+                    <div
+                      key={task.id}
+                      style={{
+                        display: 'grid',
+                        gridTemplateColumns: '28px minmax(0, 1fr) auto',
+                        gap: '12px',
+                        padding: '15px 0',
+                        borderBottom: index < items.length - 1 ? '1px solid var(--border)' : 'none',
+                        alignItems: 'start',
+                      }}
+                    >
+                      <button
+                        onClick={() => handleCheck(task)}
+                        disabled={updatingId === task.id}
+                        style={{
+                          width: '20px',
+                          height: '20px',
+                          borderRadius: '5px',
+                          border: `2px solid ${done ? 'var(--primary)' : 'var(--border-strong)'}`,
+                          background: done ? 'var(--primary)' : '#fff',
+                          color: '#fff',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          marginTop: '3px',
+                        }}
+                      >
+                        {done ? <Check size={13} /> : null}
+                      </button>
+                      <div>
+                        <p style={{ fontWeight: 800, color: done ? 'var(--text-tertiary)' : 'var(--text-primary)' }}>{task.title}</p>
+                        <p style={{ color: 'var(--text-secondary)', fontSize: '13px', marginTop: '3px' }}>{info.tip || 'Accion recomendada para ordenar el negocio.'}</p>
+                        {info.url ? (
+                          <a
+                            href={info.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', color: 'var(--primary)', fontSize: '13px', fontWeight: 800, marginTop: '8px' }}
+                          >
+                            Ver recurso <ExternalLink size={12} />
+                          </a>
+                        ) : null}
+                      </div>
+                      <Badge tone={task.priority === 'Alta' ? 'warning' : 'neutral'}>{task.priority}</Badge>
+                    </div>
+                  );
+                })}
+              </Card>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
 }

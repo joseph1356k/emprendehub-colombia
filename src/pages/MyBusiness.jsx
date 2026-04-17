@@ -1,164 +1,165 @@
 import React, { useState } from 'react';
-import { Building, Eye, EyeOff, Save, MapPin, Globe, Instagram, Linkedin, Mail, Tag, Edit } from 'lucide-react';
+import { Eye, EyeOff, Save } from 'lucide-react';
+import { Badge, Button, Card, Input, Label, PageHeader, Textarea } from '../components/ui';
 import { useApp } from '../context/AppContext';
 
 const LOOKING_OPTIONS = [
-    { id: 'capital', label: '💰 Capital' }, { id: 'clientes', label: '👥 Clientes' },
-    { id: 'aliados', label: '🤝 Aliados' }, { id: 'proveedores', label: '📦 Proveedores' },
-    { id: 'direccion', label: 'Dirección' },
+  { id: 'capital', label: 'Capital' },
+  { id: 'clientes', label: 'Clientes' },
+  { id: 'aliados', label: 'Aliados' },
+  { id: 'proveedores', label: 'Proveedores' },
+  { id: 'direccion', label: 'Direccion' },
 ];
 
 export default function MyBusiness() {
-    const { businessProfile, saveBusinessProfile, profile } = useApp();
-    const [editing, setEditing] = useState(!businessProfile);
-    const [saving, setSaving] = useState(false);
-    const [form, setForm] = useState({
-        name: businessProfile?.name || '',
-        description: businessProfile?.description || '',
-        category: businessProfile?.category || '',
-        stage: businessProfile?.stage || profile?.stage || 'Idea',
-        city: businessProfile?.city || profile?.city || '',
-        website: businessProfile?.website || '',
-        instagram: businessProfile?.instagram || '',
-        linkedin: businessProfile?.linkedin || '',
-        contact_email: businessProfile?.contact_email || '',
-        problem_solved: businessProfile?.problem_solved || '',
-        services: businessProfile?.services || '',
-        looking_for: businessProfile?.looking_for || [],
-        is_public: businessProfile?.is_public !== false,
-    });
+  const { businessProfile, saveBusinessProfile, profile } = useApp();
+  const [editing, setEditing] = useState(!businessProfile);
+  const [saving, setSaving] = useState(false);
+  const [form, setForm] = useState({
+    name: businessProfile?.name || '',
+    description: businessProfile?.description || '',
+    category: businessProfile?.category || '',
+    stage: businessProfile?.stage || profile?.stage || 'Idea',
+    city: businessProfile?.city || profile?.city || '',
+    website: businessProfile?.website || '',
+    instagram: businessProfile?.instagram || '',
+    linkedin: businessProfile?.linkedin || '',
+    contact_email: businessProfile?.contact_email || '',
+    problem_solved: businessProfile?.problem_solved || '',
+    services: businessProfile?.services || '',
+    looking_for: businessProfile?.looking_for || [],
+    is_public: businessProfile?.is_public !== false,
+  });
 
-    const update = (key, val) => setForm(p => ({ ...p, [key]: val }));
-    const toggleLooking = (id) => update('looking_for', form.looking_for.includes(id) ? form.looking_for.filter(l => l !== id) : [...form.looking_for, id]);
+  const update = (key, value) => setForm((current) => ({ ...current, [key]: value }));
+  const toggleLooking = (id) =>
+    update('looking_for', form.looking_for.includes(id) ? form.looking_for.filter((item) => item !== id) : [...form.looking_for, id]);
 
-    const handleSave = async () => {
-        if (!form.name.trim()) { alert('El nombre del negocio es requerido.'); return; }
-        setSaving(true);
-        await saveBusinessProfile(form);
-        setSaving(false);
-        setEditing(false);
-    };
+  const handleSave = async () => {
+    if (!form.name.trim()) {
+      alert('El nombre del negocio es requerido.');
+      return;
+    }
+    setSaving(true);
+    await saveBusinessProfile(form);
+    setSaving(false);
+    setEditing(false);
+  };
 
-    return (
-        <div className="page-shell animate-fade-in">
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '28px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-                    <div style={{ padding: '10px', backgroundColor: '#f0fdf4', borderRadius: '12px' }}>
-                        <Building size={22} style={{ color: 'var(--primary)' }} />
-                    </div>
-                    <div>
-                        <p className="page-kicker">Mi negocio</p>
-                        <h1 className="page-title" style={{ fontSize: '34px' }}>Perfil del negocio</h1>
-                        <p style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>Tu perfil público en la red Soe.</p>
-                    </div>
-                </div>
-                <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 14px', borderRadius: '10px', border: '1px solid var(--border)', backgroundColor: 'white', cursor: 'pointer' }}
-                        onClick={() => { if (editing) update('is_public', !form.is_public); }}>
-                        {form.is_public ? <Eye size={16} style={{ color: 'var(--primary)' }} /> : <EyeOff size={16} style={{ color: 'var(--text-tertiary)' }} />}
-                        <span style={{ fontSize: '13px', fontWeight: 600 }}>{form.is_public ? 'Público' : 'Privado'}</span>
-                        <div style={{ width: '36px', height: '20px', borderRadius: '10px', backgroundColor: form.is_public ? 'var(--primary)' : '#d1d5db', position: 'relative', transition: '0.2s' }}>
-                            <div style={{ position: 'absolute', top: '2px', left: form.is_public ? '18px' : '2px', width: '16px', height: '16px', borderRadius: '50%', backgroundColor: 'white', transition: '0.2s', boxShadow: '0 1px 3px rgba(0,0,0,0.2)' }} />
-                        </div>
-                    </div>
-                    <button className={editing ? 'btn btn-primary' : 'btn btn-secondary'} onClick={editing ? handleSave : () => setEditing(true)} disabled={saving} style={{ gap: '8px' }}>
-                        {editing ? <Save size={16} /> : <Edit size={16} />}
-                        {saving ? 'Guardando...' : editing ? 'Guardar perfil' : 'Editar'}
-                    </button>
-                </div>
+  const field = (label, key, placeholder) => (
+    <div>
+      <Label>{label}</Label>
+      {editing ? (
+        <Input value={form[key]} placeholder={placeholder} onChange={(event) => update(key, event.target.value)} />
+      ) : (
+        <p style={{ minHeight: '46px', padding: '12px 0', borderBottom: '1px solid var(--border)', color: form[key] ? 'var(--text-primary)' : 'var(--text-tertiary)', fontWeight: 700 }}>
+          {form[key] || placeholder}
+        </p>
+      )}
+    </div>
+  );
+
+  return (
+    <div className="page-shell animate-fade-in">
+      <PageHeader
+        kicker="Mi negocio"
+        title="Perfil del negocio"
+        subtitle="Contexto vivo para que Soe entienda oferta, etapa, foco y necesidades del ciclo."
+        action={
+          <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
+            <button
+              className="btn-secondary btn-pill"
+              onClick={() => editing && update('is_public', !form.is_public)}
+              type="button"
+            >
+              {form.is_public ? <Eye size={16} /> : <EyeOff size={16} />}
+              {form.is_public ? 'Visible' : 'Privado'}
+            </button>
+            <Button onClick={editing ? handleSave : () => setEditing(true)} disabled={saving}>
+              <Save size={16} /> {saving ? 'Guardando...' : editing ? 'Guardar perfil' : 'Editar perfil'}
+            </Button>
+          </div>
+        }
+      />
+
+      <div className="business-grid">
+        <Card>
+          <div className="section-grid-2" style={{ marginBottom: '18px' }}>
+            {field('Nombre del negocio', 'name', 'Nombre del negocio')}
+            {field('Categoria', 'category', 'Sector o categoria')}
+            {field('Ciudad', 'city', 'Ciudad base')}
+            {field('Sitio web', 'website', 'www.tunegocio.co')}
+            {field('Instagram', 'instagram', '@usuario')}
+            {field('LinkedIn', 'linkedin', 'linkedin.com/company/...')}
+            {field('Email de contacto', 'contact_email', 'hola@negocio.co')}
+          </div>
+
+          {[
+            ['Descripcion del negocio', 'description', 'Que vendes, a quien y con que resultado.'],
+            ['Problema que resuelve', 'problem_solved', 'Describe el dolor o trabajo que ayudas a resolver.'],
+            ['Productos y servicios', 'services', 'Lista corta de ofertas principales.'],
+          ].map(([label, key, placeholder]) => (
+            <div key={key} style={{ marginBottom: '18px' }}>
+              <Label>{label}</Label>
+              {editing ? (
+                <Textarea rows={3} value={form[key]} placeholder={placeholder} onChange={(event) => update(key, event.target.value)} />
+              ) : (
+                <p style={{ padding: '12px 0', borderBottom: '1px solid var(--border)', color: form[key] ? 'var(--text-secondary)' : 'var(--text-tertiary)', lineHeight: 1.7 }}>
+                  {form[key] || placeholder}
+                </p>
+              )}
             </div>
+          ))}
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 320px', gap: '24px' }}>
-                {/* Form */}
-                <div className="card" style={{ padding: '28px' }}>
-                    {!businessProfile && !editing && (
-                        <div style={{ textAlign: 'center', padding: '40px 20px' }}>
-                            <p style={{ fontSize: '48px', marginBottom: '12px' }}>🏢</p>
-                            <h2 style={{ fontWeight: 700, marginBottom: '8px' }}>Crea tu perfil de negocio</h2>
-                            <p style={{ color: 'var(--text-secondary)', marginBottom: '20px' }}>Hazte visible en la red Soe y conecta con aliados, clientes e inversionistas.</p>
-                            <button className="btn btn-primary" onClick={() => setEditing(true)}>Crear perfil ahora →</button>
-                        </div>
-                    )}
-                    {(editing || businessProfile) && (
-                        <div>
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-                                {[
-                                    { label: 'Nombre del emprendimiento *', key: 'name', placeholder: 'EcoPack Colombia' },
-                                    { label: 'Categoría / Sector', key: 'category', placeholder: 'Sostenibilidad, FinTech, etc.' },
-                                    { label: 'Ciudad', key: 'city', placeholder: 'Bogotá, Colombia' },
-                                    { label: 'Sitio web', key: 'website', placeholder: 'www.minegocio.co' },
-                                    { label: 'Instagram', key: 'instagram', placeholder: '@handle' },
-                                    { label: 'LinkedIn', key: 'linkedin', placeholder: 'linkedin.com/company/...' },
-                                    { label: 'Email de contacto', key: 'contact_email', placeholder: 'hola@negocio.co' },
-                                ].map(f => (
-                                    <div key={f.key} className="form-group" style={{ marginBottom: 0 }}>
-                                        <label className="form-label">{f.label}</label>
-                                        {editing ? <input className="form-input" value={form[f.key]} placeholder={f.placeholder} onChange={e => update(f.key, e.target.value)} />
-                                            : <p style={{ padding: '8px 0', fontWeight: 500, borderBottom: '1px solid var(--border)', minHeight: '36px' }}>{form[f.key] || <span style={{ color: 'var(--text-tertiary)' }}>—</span>}</p>}
-                                    </div>
-                                ))}
-                            </div>
-                            {[
-                                { label: 'Descripción del negocio', key: 'description', placeholder: 'En EcoPack fabricamos empaques 100% biodegradables para e-commerce...' },
-                                { label: '¿Qué problema resuelves?', key: 'problem_solved', placeholder: 'El acceso a packaging ecológico de calidad a precios accesibles.' },
-                                { label: 'Productos y servicios que ofreces', key: 'services', placeholder: 'Cajas biodegradables, bolsas kraft, empaques personalizados...' },
-                            ].map(f => (
-                                <div key={f.key} className="form-group" style={{ marginTop: '16px' }}>
-                                    <label className="form-label">{f.label}</label>
-                                    {editing ? <textarea className="form-input" rows={3} value={form[f.key]} placeholder={f.placeholder} onChange={e => update(f.key, e.target.value)} style={{ resize: 'vertical' }} />
-                                        : <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, borderBottom: '1px solid var(--border)', paddingBottom: '12px' }}>{form[f.key] || <span style={{ color: 'var(--text-tertiary)' }}>—</span>}</p>}
-                                </div>
-                            ))}
-                            <div className="form-group">
-                                <label className="form-label">¿Qué buscas actualmente?</label>
-                                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '6px' }}>
-                                    {LOOKING_OPTIONS.map(opt => {
-                                        const sel = form.looking_for.includes(opt.id);
-                                        return (
-                                            <button key={opt.id} onClick={() => editing && toggleLooking(opt.id)}
-                                                style={{ padding: '7px 14px', borderRadius: '99px', fontSize: '12px', fontWeight: 700, border: `2px solid ${sel ? 'var(--primary)' : 'var(--border)'}`, backgroundColor: sel ? 'var(--primary-light)' : 'white', color: sel ? 'var(--primary-dark)' : 'var(--text-secondary)', cursor: editing ? 'pointer' : 'default', transition: 'var(--transition)', fontFamily: 'var(--font-family)' }}>
-                                                {opt.label}
-                                            </button>
-                                        );
-                                    })}
-                                </div>
-                            </div>
-                        </div>
-                    )}
-                </div>
-
-                {/* Preview */}
-                <div>
-                    <div className="card" style={{ padding: '24px', border: form.is_public ? '2px solid var(--primary-light)' : '2px solid var(--border)' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '16px' }}>
-                            {form.is_public ? <Eye size={14} style={{ color: 'var(--primary)' }} /> : <EyeOff size={14} style={{ color: 'var(--text-tertiary)' }} />}
-                            <span style={{ fontSize: '11px', fontWeight: 700, color: form.is_public ? 'var(--primary)' : 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                                {form.is_public ? 'Visible en la red' : 'Solo para ti'}
-                            </span>
-                        </div>
-                        <div style={{ textAlign: 'center', padding: '8px 0 16px' }}>
-                            <div style={{ width: '56px', height: '56px', borderRadius: '14px', backgroundColor: '#d1fae5', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '28px', margin: '0 auto 12px' }}>🏢</div>
-                            <h3 style={{ fontWeight: 800, fontSize: '16px', marginBottom: '2px' }}>{form.name || 'Nombre del negocio'}</h3>
-                            <p style={{ fontSize: '12px', fontWeight: 600, color: 'var(--primary)', marginBottom: '6px' }}>{form.stage} · {form.category || 'Categoría'}</p>
-                            {form.city && <p style={{ fontSize: '12px', color: 'var(--text-tertiary)', display: 'flex', alignItems: 'center', gap: '4px', justifyContent: 'center' }}><MapPin size={11} /> {form.city}</p>}
-                        </div>
-                        {form.description && <p style={{ fontSize: '12px', color: 'var(--text-secondary)', lineHeight: 1.6, marginBottom: '14px', textAlign: 'center' }}>{form.description.slice(0, 120)}{form.description.length > 120 ? '...' : ''}</p>}
-                        {form.looking_for.length > 0 && (
-                            <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', justifyContent: 'center' }}>
-                                {form.looking_for.map(id => {
-                                    const opt = LOOKING_OPTIONS.find(o => o.id === id);
-                                    return opt ? <span key={id} style={{ padding: '4px 10px', borderRadius: '99px', fontSize: '11px', fontWeight: 700, backgroundColor: 'var(--primary-light)', color: 'var(--primary-dark)' }}>{opt.label}</span> : null;
-                                })}
-                            </div>
-                        )}
-                    </div>
-
-                    <div className="card" style={{ marginTop: '16px', backgroundColor: '#f0fdf4', border: '1px solid #bbf7d0', padding: '16px' }}>
-                        <p style={{ fontWeight: 700, color: '#166534', fontSize: '13px', marginBottom: '6px' }}>💡 Tip de visibilidad</p>
-                        <p style={{ fontSize: '12px', color: '#166534', lineHeight: 1.6 }}>Un perfil completo y público recibe <strong>3x más contactos</strong> de aliados e inversionistas en la red.</p>
-                    </div>
-                </div>
+          <div>
+            <Label>Que buscas ahora</Label>
+            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+              {LOOKING_OPTIONS.map((option) => {
+                const selected = form.looking_for.includes(option.id);
+                return (
+                  <button
+                    key={option.id}
+                    className={`topbar-tab ${selected ? 'active' : ''}`}
+                    onClick={() => editing && toggleLooking(option.id)}
+                    type="button"
+                    style={{ border: '1px solid var(--border)', background: selected ? 'var(--primary-light)' : '#fff' }}
+                  >
+                    {option.label}
+                  </button>
+                );
+              })}
             </div>
-        </div>
-    );
+          </div>
+        </Card>
+
+        <aside style={{ display: 'grid', gap: '16px', alignContent: 'start' }}>
+          <Card>
+            <Badge tone={form.is_public ? 'mint' : 'neutral'}>{form.is_public ? 'Visible en la red' : 'Solo para ti'}</Badge>
+            <h2 className="display-font" style={{ fontSize: '30px', lineHeight: 1.1, marginTop: '18px' }}>
+              {form.name || 'Nombre del negocio'}
+            </h2>
+            <p style={{ color: 'var(--primary)', fontWeight: 800, marginTop: '8px' }}>{form.stage} · {form.category || 'Categoria'}</p>
+            <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, marginTop: '16px' }}>
+              {form.description || 'Una descripcion clara ayuda a Soe a priorizar oportunidades y acciones.'}
+            </p>
+            {form.looking_for.length > 0 ? (
+              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '16px' }}>
+                {form.looking_for.map((id) => {
+                  const option = LOOKING_OPTIONS.find((item) => item.id === id);
+                  return option ? <Badge key={id} tone="info">{option.label}</Badge> : null;
+                })}
+              </div>
+            ) : null}
+          </Card>
+
+          <Card style={{ background: 'var(--mint-soft)', borderColor: 'var(--mint)' }}>
+            <p style={{ color: 'var(--status-success)', fontWeight: 800 }}>Por que se conserva</p>
+            <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, marginTop: '8px' }}>
+              Este perfil alimenta diagnostico, oportunidades y recomendaciones. Aporta valor directo al sistema Soe.
+            </p>
+          </Card>
+        </aside>
+      </div>
+    </div>
+  );
 }

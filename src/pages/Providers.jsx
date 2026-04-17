@@ -1,133 +1,150 @@
-import React, { useState } from 'react';
-import { Search, Bookmark, BookmarkCheck, Star, X, Mail, MapPin } from 'lucide-react';
+import React, { useMemo, useState } from 'react';
+import { Bookmark, BookmarkCheck, Mail, MapPin, Search, Star, X } from 'lucide-react';
+import { Badge, Button, Card, EmptyState, Input, PageHeader } from '../components/ui';
 import { useApp } from '../context/AppContext';
-import { MOCK_PROVIDERS, CATEGORIES } from '../data/mockData';
+import { CATEGORIES, MOCK_PROVIDERS } from '../data/mockData';
 
 export default function Providers() {
-    const { savedProviders, toggleSaveProvider } = useApp();
-    const [search, setSearch] = useState('');
-    const [category, setCategory] = useState('Todos');
-    const [profileId, setProfileId] = useState(null);
+  const { savedProviders, toggleSaveProvider } = useApp();
+  const [search, setSearch] = useState('');
+  const [category, setCategory] = useState('Todos');
+  const [profileId, setProfileId] = useState(null);
 
-    const filtered = MOCK_PROVIDERS.filter(p => {
-        const matchSearch = !search || p.name.toLowerCase().includes(search.toLowerCase()) || p.description.toLowerCase().includes(search.toLowerCase());
-        const matchCat = category === 'Todos' || p.category === category;
-        return matchSearch && matchCat;
-    });
+  const filtered = useMemo(
+    () =>
+      MOCK_PROVIDERS.filter((provider) => {
+        const query = search.toLowerCase();
+        const matchSearch = !query || provider.name.toLowerCase().includes(query) || provider.description.toLowerCase().includes(query);
+        const matchCategory = category === 'Todos' || provider.category === category;
+        return matchSearch && matchCategory;
+      }),
+    [category, search]
+  );
 
-    const providerDetail = MOCK_PROVIDERS.find(p => p.id === profileId);
+  const providerDetail = MOCK_PROVIDERS.find((provider) => provider.id === profileId);
 
-    return (
-        <div className="page-shell animate-fade-in">
-            <div style={{ marginBottom: '24px' }}>
-                <p className="page-kicker">Red experta</p>
-                <h1 className="page-title" style={{ marginTop: '8px' }}>Empresas y servicios</h1>
-                <p className="page-subtitle" style={{ marginTop: '8px' }}>Perfiles que apoyan decisiones, ejecucion y crecimiento del negocio.</p>
-            </div>
+  return (
+    <div className="page-shell animate-fade-in">
+      <PageHeader
+        kicker="Red experta"
+        title="Empresas y servicios"
+        subtitle="Opciones conservadas por valor operativo: legal, finanzas, tecnologia, marca y direccion externa."
+      />
 
-            {/* Search + Filters */}
-            <div style={{ display: 'flex', gap: '12px', marginBottom: '16px', flexWrap: 'wrap' }}>
-                <div style={{ position: 'relative', flex: 1, minWidth: '200px' }}>
-                    <Search size={15} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-tertiary)' }} />
-                    <input className="form-input" placeholder="Buscar por nombre o servicio..." value={search} onChange={e => setSearch(e.target.value)} style={{ paddingLeft: '35px' }} />
-                </div>
-            </div>
-
-            {/* Category pills */}
-            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '20px' }}>
-                {CATEGORIES.map(cat => (
-                    <button key={cat} onClick={() => setCategory(cat)}
-                        style={{ padding: '7px 16px', borderRadius: '99px', fontSize: '13px', fontWeight: 600, border: `2px solid ${category === cat ? 'var(--primary)' : 'var(--border)'}`, backgroundColor: category === cat ? 'var(--primary)' : 'white', color: category === cat ? 'white' : 'var(--text-secondary)', cursor: 'pointer', fontFamily: 'var(--font-family)', transition: 'var(--transition)' }}>
-                        {cat}
-                    </button>
-                ))}
-            </div>
-
-            {filtered.length === 0 ? (
-                <div style={{ textAlign: 'center', padding: '60px', color: 'var(--text-tertiary)' }}>
-                    <p style={{ fontSize: '40px', marginBottom: '12px' }}>🔍</p>
-                    <p style={{ fontWeight: 600 }}>Sin resultados para "{search}"</p>
-                </div>
-            ) : (
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '16px' }}>
-                    {filtered.map(prov => {
-                        const isSaved = savedProviders.includes(prov.id);
-                        return (
-                            <div key={prov.id} className="card" style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '12px', transition: 'var(--transition)' }}
-                                onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-2px)'}
-                                onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                                    <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-                                        <div style={{ width: '44px', height: '44px', borderRadius: '12px', backgroundColor: prov.badgeColor, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: '15px', color: prov.badgeText, flexShrink: 0 }}>
-                                            {prov.initials}
-                                        </div>
-                                        <div>
-                                            <h3 style={{ fontWeight: 700, fontSize: '14px', marginBottom: '2px' }}>{prov.name}</h3>
-                                            <span style={{ fontSize: '11px', fontWeight: 700, padding: '2px 8px', borderRadius: '99px', backgroundColor: prov.badgeColor, color: prov.badgeText }}>{prov.category}</span>
-                                        </div>
-                                    </div>
-                                    <button onClick={() => toggleSaveProvider(prov.id)}
-                                        style={{ padding: '6px', borderRadius: '8px', border: '1px solid var(--border)', backgroundColor: isSaved ? '#f0fdf4' : 'white', cursor: 'pointer', color: isSaved ? 'var(--primary)' : 'var(--text-secondary)', transition: 'var(--transition)' }}>
-                                        {isSaved ? <BookmarkCheck size={16} /> : <Bookmark size={16} />}
-                                    </button>
-                                </div>
-
-                                <p style={{ fontSize: '12px', color: 'var(--text-secondary)', lineHeight: 1.6 }}>{prov.description}</p>
-
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: 'var(--text-tertiary)' }}>
-                                    <MapPin size={12} /> {prov.city}
-                                    <span style={{ margin: '0 6px' }}>·</span>
-                                    <Star size={12} style={{ color: '#f59e0b', fill: '#f59e0b' }} /> {prov.rating}
-                                </div>
-
-                                <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
-                                    {prov.services.slice(0, 3).map(s => (
-                                        <span key={s} style={{ fontSize: '11px', padding: '3px 8px', borderRadius: '6px', backgroundColor: 'var(--bg-main)', color: 'var(--text-secondary)', fontWeight: 500 }}>{s}</span>
-                                    ))}
-                                </div>
-
-                                <div style={{ display: 'flex', gap: '8px' }}>
-                                    <button className="btn btn-secondary" onClick={() => setProfileId(prov.id)} style={{ flex: 1, fontSize: '12px', padding: '8px' }}>Ver perfil</button>
-                                    <a href={`mailto:${prov.email}`} className="btn btn-primary" style={{ flex: 1, fontSize: '12px', padding: '8px', textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
-                                        <Mail size={13} /> Contactar
-                                    </a>
-                                </div>
-                            </div>
-                        );
-                    })}
-                </div>
-            )}
-
-            {/* Profile Modal */}
-            {providerDetail && (
-                <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }} onClick={() => setProfileId(null)}>
-                    <div className="card" style={{ maxWidth: '520px', width: '100%', padding: '32px', maxHeight: '85vh', overflow: 'auto' }} onClick={e => e.stopPropagation()}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '20px' }}>
-                            <div style={{ display: 'flex', gap: '14px', alignItems: 'center' }}>
-                                <div style={{ width: '52px', height: '52px', borderRadius: '14px', backgroundColor: providerDetail.badgeColor, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: '18px', color: providerDetail.badgeText }}>{providerDetail.initials}</div>
-                                <div>
-                                    <h2 style={{ fontWeight: 800, fontSize: '18px' }}>{providerDetail.name}</h2>
-                                    <p style={{ color: 'var(--text-secondary)', fontSize: '13px' }}>{providerDetail.category} · <Star size={12} style={{ color: '#f59e0b', fill: '#f59e0b' }} /> {providerDetail.rating}</p>
-                                </div>
-                            </div>
-                            <button onClick={() => setProfileId(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-tertiary)' }}><X size={20} /></button>
-                        </div>
-                        <p style={{ lineHeight: 1.7, color: 'var(--text-secondary)', marginBottom: '20px' }}>{providerDetail.description}</p>
-                        <div style={{ marginBottom: '20px' }}>
-                            <p style={{ fontWeight: 700, fontSize: '13px', marginBottom: '8px' }}>Servicios</p>
-                            {providerDetail.services.map(s => <p key={s} style={{ fontSize: '13px', padding: '6px 0', borderBottom: '1px solid var(--border)', color: 'var(--text-secondary)' }}>• {s}</p>)}
-                        </div>
-                        <div style={{ display: 'flex', gap: '10px' }}>
-                            <button className="btn btn-secondary" onClick={() => toggleSaveProvider(providerDetail.id)} style={{ flex: 1 }}>
-                                {savedProviders.includes(providerDetail.id) ? '🔖 Guardado' : '🔖 Guardar'}
-                            </button>
-                            <a href={`mailto:${providerDetail.email}`} className="btn btn-primary" style={{ flex: 1, textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
-                                <Mail size={14} /> Contactar
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            )}
+      <Card style={{ marginBottom: '18px', padding: '16px' }}>
+        <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', alignItems: 'center' }}>
+          <div style={{ position: 'relative', flex: '1 1 260px' }}>
+            <Search size={16} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-tertiary)' }} />
+            <Input placeholder="Buscar por servicio o perfil..." value={search} onChange={(event) => setSearch(event.target.value)} style={{ paddingLeft: '42px' }} />
+          </div>
+          {CATEGORIES.map((item) => (
+            <button
+              key={item}
+              onClick={() => setCategory(item)}
+              className={`topbar-tab ${category === item ? 'active' : ''}`}
+              style={{ border: '1px solid var(--border)', background: category === item ? 'var(--primary-light)' : '#fff' }}
+            >
+              {item}
+            </button>
+          ))}
         </div>
-    );
+      </Card>
+
+      {filtered.length === 0 ? (
+        <Card>
+          <EmptyState title="Sin resultados" description="Ajusta la busqueda o cambia la categoria." />
+        </Card>
+      ) : (
+        <div className="section-grid-3">
+          {filtered.map((provider) => {
+            const saved = savedProviders.includes(provider.id);
+            return (
+              <Card key={provider.id} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', gap: '14px', alignItems: 'flex-start' }}>
+                  <div>
+                    <Badge tone="info">{provider.category}</Badge>
+                    <h2 style={{ fontSize: '20px', fontWeight: 800, marginTop: '12px' }}>{provider.name}</h2>
+                    <p style={{ display: 'flex', alignItems: 'center', gap: '7px', color: 'var(--text-secondary)', fontSize: '13px', marginTop: '5px' }}>
+                      <MapPin size={13} /> {provider.city}
+                    </p>
+                  </div>
+                  <button
+                    className="btn-secondary btn-pill"
+                    onClick={() => toggleSaveProvider(provider.id)}
+                    aria-label={saved ? 'Quitar de guardados' : 'Guardar perfil'}
+                    style={{ width: '42px', padding: 0 }}
+                  >
+                    {saved ? <BookmarkCheck size={16} /> : <Bookmark size={16} />}
+                  </button>
+                </div>
+
+                <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7 }}>{provider.description}</p>
+
+                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                  {provider.services.slice(0, 3).map((service) => (
+                    <Badge key={service} tone="neutral">{service}</Badge>
+                  ))}
+                </div>
+
+                <p style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--text-secondary)', fontSize: '13px', marginTop: 'auto' }}>
+                  <Star size={13} style={{ color: 'var(--status-warning)', fill: 'var(--status-warning)' }} /> {provider.rating}
+                </p>
+
+                <div style={{ display: 'flex', gap: '10px' }}>
+                  <Button variant="secondary" onClick={() => setProfileId(provider.id)} style={{ flex: 1 }}>Ver perfil</Button>
+                  <a href={`mailto:${provider.email}`} className="btn-primary btn-pill" style={{ flex: 1 }}>
+                    <Mail size={14} /> Contactar
+                  </a>
+                </div>
+              </Card>
+            );
+          })}
+        </div>
+      )}
+
+      {providerDetail ? (
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            zIndex: 240,
+            display: 'grid',
+            placeItems: 'center',
+            padding: '20px',
+            background: 'rgba(55, 47, 100, 0.24)',
+          }}
+          onClick={() => setProfileId(null)}
+        >
+          <Card style={{ width: '100%', maxWidth: '600px', padding: '28px' }} onClick={(event) => event.stopPropagation()}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', gap: '12px', marginBottom: '16px' }}>
+              <div>
+                <Badge tone="info">{providerDetail.category}</Badge>
+                <h2 className="page-title" style={{ fontSize: '32px', marginTop: '12px' }}>{providerDetail.name}</h2>
+                <p style={{ color: 'var(--text-secondary)', marginTop: '6px' }}>{providerDetail.city} · Calificacion {providerDetail.rating}</p>
+              </div>
+              <button className="btn-ghost" onClick={() => setProfileId(null)} aria-label="Cerrar perfil">
+                <X size={18} />
+              </button>
+            </div>
+            <p style={{ color: 'var(--text-secondary)', lineHeight: 1.8, marginBottom: '20px' }}>{providerDetail.description}</p>
+            <div style={{ display: 'grid', gap: '10px', marginBottom: '22px' }}>
+              {providerDetail.services.map((service) => (
+                <div key={service} style={{ padding: '12px 0', borderBottom: '1px solid var(--border)', color: 'var(--text-secondary)', fontWeight: 700 }}>
+                  {service}
+                </div>
+              ))}
+            </div>
+            <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+              <Button variant="secondary" onClick={() => toggleSaveProvider(providerDetail.id)}>
+                {savedProviders.includes(providerDetail.id) ? 'Quitar de guardados' : 'Guardar'}
+              </Button>
+              <a href={`mailto:${providerDetail.email}`} className="btn-primary btn-pill">
+                <Mail size={14} /> Contactar
+              </a>
+            </div>
+          </Card>
+        </div>
+      ) : null}
+    </div>
+  );
 }
