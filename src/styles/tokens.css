@@ -1,0 +1,57 @@
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700;800&display=swap');
+
+:root {
+  --bg-main: #f8f7fb;
+  --bg-soft: #f1eff8;
+  --bg-sidebar: #ffffff;
+  --bg-sidebar-hover: #f0edf9;
+  --bg-sidebar-active: #ece8f8;
+  --bg-surface: #ffffff;
+  --bg-panel: #fbfaff;
+
+  --primary: #5f57ac;
+  --primary-hover: #534c9c;
+  --primary-light: #edeaf8;
+  --primary-dark: #372f64;
+
+  --text-primary: #372f64;
+  --text-secondary: #6f6a8a;
+  --text-tertiary: #9893af;
+  --text-inverse: #ffffff;
+  --text-inverse-muted: #e8e5f4;
+
+  --border: #d8d4e9;
+  --border-strong: #b0accd;
+  --border-sidebar: #dedaf0;
+
+  --mint: #b1d8cd;
+  --mint-soft: #e8f5f1;
+  --status-success: #2e8b6d;
+  --status-warning: #d9b87a;
+  --status-error: #b84d5b;
+  --status-info: #5f57ac;
+
+  --font-body: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-display: 'Fraunces', Georgia, serif;
+  --font-family: var(--font-body);
+
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-xl: 24px;
+  --radius-full: 999px;
+
+  --shadow-sm: 0 8px 24px rgba(55, 47, 100, 0.06);
+  --shadow-md: 0 16px 48px rgba(55, 47, 100, 0.08);
+  --shadow-lg: 0 24px 64px rgba(55, 47, 100, 0.1);
+
+  --space-1: 8px;
+  --space-2: 12px;
+  --space-3: 16px;
+  --space-4: 24px;
+  --space-5: 32px;
+  --space-6: 48px;
+  --space-7: 64px;
+
+  --transition: 160ms ease;
+}
